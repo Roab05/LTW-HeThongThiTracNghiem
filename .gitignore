@@ -10,7 +10,7 @@ node_modules/
 /obj
 
 # Editor-specific files
-.vscode/*.db* # Ignores Workspace database files
+.vscode/ # Ignores Workspace database files
 .history/ # Third-party extension history files
 
 # System Files
