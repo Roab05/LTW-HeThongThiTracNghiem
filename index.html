@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Thi Trắc Nghiệm - PTIT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>HỆ THỐNG THI TRỰC TUYẾN</h2>
+            <p>Học viện Công nghệ Bưu chính Viễn thông</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="btnLoginTab" onclick="switchTab('login')">Đăng Nhập</button>
+            <button class="tab-btn" id="btnRegisterTab" onclick="switchTab('register')">Đăng Ký</button>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <label for="loginUsername">Tên đăng nhập</label>
+                <input type="text" id="loginUsername" placeholder="Nhập mã sinh viên hoặc username">
+                <span class="error-message" id="loginUsernameErr"></span>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Mật khẩu</label>
+                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
+                <span class="error-message" id="loginPasswordErr"></span>
+            </div>
+            <button type="submit" class="submit-btn">ĐĂNG NHẬP</button>
+        </form>
+
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="regUsername">Tên người dùng</label>
+                <input type="text" id="regUsername" placeholder="Nhập tên đăng nhập">
+                <span class="error-message" id="regUsernameErr"></span>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="ví dụ: sinhvien@stu.ptit.edu.vn">
+                <span class="error-message" id="regEmailErr"></span>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Mật khẩu</label>
+                <input type="password" id="regPassword" placeholder="Nhập mật khẩu">
+                <span class="error-message" id="regPasswordErr"></span>
+            </div>
+            <div class="form-group">
+                <label for="regConfirmPassword">Xác nhận mật khẩu</label>
+                <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu">
+                <span class="error-message" id="regConfirmPasswordErr"></span>
+            </div>
+            <button type="submit" class="submit-btn">ĐĂNG KÝ</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
