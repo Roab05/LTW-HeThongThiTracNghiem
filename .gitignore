@@ -1,23 +1,39 @@
-# Dependencies
-node_modules/
-/env
-.venv/
+# dependencies
+/node_modules
 
-# Compilation output
-/dist
+# build output
 /build
-/bin
-/obj
+/dist
+/out
+/docs
+.vitepress/cache
+# ... more build-related patterns
 
-# Editor-specific files
-.vscode/ # Ignores Workspace database files
-.history/ # Third-party extension history files
+# temporary files and caches
+.temp
+.cache
+.vite/*.sock
+.parcel-cache
 
-# System Files
+# miscellaneous
 .DS_Store # macOS system files
-Thumbs.db # Windows system files
-
-# Logs and other files
+*.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.idea # JetBrains IDE files
+
+# environment variables
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# testing
+/coverage
+
+# VS Code
+.vscode/
