@@ -18,7 +18,7 @@ Before setting up the project, make sure you have:
 
 You can work with this project in two different modes:
 
-### 1. Quick start with CDN (no build system)
+### 1. Quick start with CDN (no build system, ae kệ bước này đi, xuống xem cách 2)
 
 This mode is handy for experimentation or classroom demos. It uses React via CDN and Babel for in‑browser JSX compilation.
 
@@ -41,7 +41,7 @@ This mode is handy for experimentation or classroom demos. It uses React via CDN
 
 > ⚠️ This setup is **not suitable for production**. It downloads large dev builds and uses Babel at runtime.
 
-### 2. Full project with npm & bundler
+### 2. Full project with npm & bundler (ae làm theo cái này nhé)
 
 For a proper development workflow you should convert this into a Node project with a bundler (CRA/Vite/Webpack).
 
