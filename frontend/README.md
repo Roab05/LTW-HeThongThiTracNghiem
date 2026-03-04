@@ -1,5 +1,22 @@
 # Getting Started with Create React App
 
+## Demo frontend – Hệ thống thi trắc nghiệm
+
+### Chạy dự án
+
+- Cài dependency: `npm install`
+- Chạy dev: `npm start`
+
+### Tài khoản demo (fix ở frontend)
+
+- Sinh viên: `230056PCNCT` / `123456`
+- Admin: `admin` / `admin123`
+
+### Các trang chính
+
+- User: `/login`, `/register`, `/` (danh sách kỳ thi), `/exams/:examId`, `/results/:attemptId`
+- Admin: `/admin/login`, `/admin` (dashboard), `/admin/exams`, `/admin/users`, `/admin/statistics`, `/admin/students`
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
