@@ -164,7 +164,10 @@ a {
 }
 
 .heroRight {
-  background:
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-image:
     radial-gradient(circle at 20% 20%, rgba(214, 69, 69, 0.14), transparent 60%),
     radial-gradient(circle at 80% 30%, rgba(0, 0, 0, 0.08), transparent 55%),
     linear-gradient(135deg, #f0f0f0, #ffffff);

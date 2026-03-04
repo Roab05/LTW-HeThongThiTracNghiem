@@ -72,7 +72,10 @@ export default function AdminLoginPage() {
                     </div>
                 </form>
             </div>
-            <div className="heroRight" />
+            <div
+                className="heroRight"
+                style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/ptit-gate.png)` }}
+            />
         </div>
     );
 }

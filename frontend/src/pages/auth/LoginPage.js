@@ -82,7 +82,10 @@ export default function LoginPage() {
                     </Link>
                 </div>
             </div>
-            <div className="heroRight" />
+            <div
+                className="heroRight"
+                style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/ptit-gate.png)` }}
+            />
         </div>
     );
 }
