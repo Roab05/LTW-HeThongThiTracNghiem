@@ -67,8 +67,8 @@ export default function LoginPage() {
                     </div>
 
                     <div style={{ marginTop: 16 }}>
-                        <button className="btn btnSolid" type="submit" disabled={!canSubmit}>
-                            ĐĂNG NHẬP
+                        <button className="btn btnSolid btnAuthLogin" type="submit" disabled={!canSubmit}>
+                            Đăng Nhập
                         </button>
                     </div>
 

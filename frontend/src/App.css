@@ -142,6 +142,10 @@ a {
   color: #fff;
 }
 
+.btnAuthLogin {
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
