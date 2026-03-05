@@ -26,7 +26,11 @@ for (let i = 4; i <= 20; i++) {
     });
 }
 
-const userAnswers = {}; // Lưu trữ đáp án của người dùng
+const userAnswers = {
+    1: 0, 
+    2: 1
+}; // Lưu trữ đáp án của người dùng
+
 const flaggedQuestions = new Set(); // Lưu trữ các câu được cắm cờ
 let currentActiveId = 3; // Giả sử câu 3 đang được xem (theo ảnh mẫu)
 

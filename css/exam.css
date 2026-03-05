@@ -223,19 +223,19 @@ body {
     font-weight: bold;
     cursor: pointer;
     background-color: #9e9e9e; /* Xám mặc định chưa làm */
-    color: transparent; /* Giấu số đi cho giống ảnh mẫu các ô xám */
+    color: #ffffff; /* CẬP NHẬT: Đổi từ transparent sang #ffffff (trắng) để hiện số */
     transition: 0.2s;
 }
 
-/* Trạng thái đã làm / đang xem */
+/* Trạng thái đã làm / đang xem (Giữ nguyên) */
 .grid-item.answered {
     background-color: #f2d4d4; /* Hồng nhạt */
-    color: #333; /* Hiện số */
+    color: #333; /* Chữ màu tối */
 }
 
 .grid-item.active {
-    background-color: #c44e4e; /* Đỏ đậm (như câu 3 trong ảnh) */
-    color: #ffffff; /* Hiện số trắng */
+    background-color: #c44e4e; /* Đỏ đậm */
+    color: #ffffff; /* Chữ màu trắng */
 }
 
 .grid-item.flagged {

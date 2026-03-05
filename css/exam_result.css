@@ -40,6 +40,15 @@ body {
     object-fit: contain;
 }
 
+.logo-area a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+}
+
 .title-area {
     flex: 1;
     display: flex;
