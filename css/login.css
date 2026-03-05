@@ -153,9 +153,9 @@ body {
 }
 
 .bg_user{
-    background-image: url('../user_login_background.png');
+    background-image: url('../assets/user_login_background.png');
 }
 
 .bg_admin{
-    background-image: url('../admin_login_background.png');
+    background-image: url('../assets/admin_login_background.png');
 }
