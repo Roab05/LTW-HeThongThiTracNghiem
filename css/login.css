@@ -152,10 +152,10 @@ body {
     background-repeat: no-repeat;
 }
 
-.bg_user{
+.bg-user{
     background-image: url('../assets/user_login_background.png');
 }
 
-.bg_admin{
+.bg-admin{
     background-image: url('../assets/admin_login_background.png');
 }
