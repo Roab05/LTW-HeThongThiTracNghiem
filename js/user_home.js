@@ -1,4 +1,3 @@
-// Dữ liệu mock giống ảnh mẫu
 const examsData = [
     { code: "230756PCNCT", name: "Luyện tập quay lui", time: "Không giới hạn", type: "Luyện tập", duration: "90 phút", status: "Sẵn sàng" },
     { code: "230056PCNCT", name: "Kiểm tra cuối kì", time: "8:30 25/02/2026", type: "Kiểm tra", duration: "90 phút", status: "Chưa bắt đầu" },
@@ -11,9 +10,8 @@ const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const typeFilter = document.getElementById('typeFilter');
 
-// Hàm Render danh sách ra HTML
 function renderExams(data) {
-    examListContainer.innerHTML = ''; // Xóa rỗng trước khi render lại
+    examListContainer.innerHTML = '';
     
     if(data.length === 0) {
         examListContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Không tìm thấy bài thi nào phù hợp.</p>';
@@ -42,7 +40,6 @@ function renderExams(data) {
     });
 }
 
-// Hàm lọc dữ liệu
 function filterExams() {
     const keyword = searchInput.value.toLowerCase();
     const statusVal = statusFilter.value;
@@ -58,20 +55,16 @@ function filterExams() {
     renderExams(filteredData);
 }
 
-// Thay thế hàm startExam trong js/main.js bằng đoạn này:
 function startExam(code, isExpired) {
     if (isExpired) {
         alert("Kỳ thi này đã quá hạn!");
         return;
     }
-    // Chuyển hướng sang trang làm bài thi
     window.location.href = 'exam.html'; 
 }
 
-// Lắng nghe sự kiện thay đổi trên các ô nhập/chọn
 searchInput.addEventListener('input', filterExams);
 statusFilter.addEventListener('change', filterExams);
 typeFilter.addEventListener('change', filterExams);
 
-// Khởi tạo hiển thị ban đầu
 renderExams(examsData);

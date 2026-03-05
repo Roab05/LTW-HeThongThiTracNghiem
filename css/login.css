@@ -17,36 +17,33 @@ body {
     width: 100%;
 }
 
-/* --- Panel Trái --- */
 .left-panel {
-    width: 31%; /* Chỉnh đúng tỷ lệ panel trái như ảnh gốc */
+    width: 31%;
     min-width: 400px;
-    background-color: #cb3e3e; /* Đỏ chuẩn */
+    background-color: #cb3e3e;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 0 45px; /* Quyết định khoảng trắng hai bên của Form */
+    padding: 0 45px;
 }
 
 .form-wrapper {
-    width: 100%; /* Mấu chốt: Cho phép form giãn hết 100% không gian cho phép */
-    max-width: 500px; /* Tăng giới hạn tối đa để form không bị bé xíu trên màn to */
+    width: 100%;
+    max-width: 500px; 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Thẻ form màu trắng */
 .form-card {
     background-color: #ffffff;
     width: 100%;
     border-radius: 12px;
-    padding: 40px 30px 20px 30px; /* Tăng độ dày bên trong form cho thoáng */
+    padding: 40px 30px 20px 30px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Khối Logo */
 .logo-box {
     width: 120px;
     height: 120px;
@@ -63,15 +60,14 @@ body {
     object-fit: contain;
 }
 
-/* Nhóm Input */
 .input-group {
     display: flex;
     align-items: center;
-    background-color: #f4eae9; /* Xám đỏ nhạt */
+    background-color: #f4eae9;
     border-radius: 8px;
     margin-bottom: 16px;
     padding: 0 15px;
-    height: 55px; /* Tăng chiều cao để ô input to ra tương xứng */
+    height: 55px;
 }
 
 .input-group i {
@@ -86,7 +82,7 @@ body {
     border: none;
     background: transparent;
     outline: none;
-    font-size: 16px; /* Chữ to hơn */
+    font-size: 16px;
     color: #333;
 }
 
@@ -94,7 +90,6 @@ body {
     color: #b3a5a5;
 }
 
-/* Quên mật khẩu */
 .forgot-pwd-container {
     display: flex;
     justify-content: flex-end;
@@ -113,17 +108,16 @@ body {
     text-decoration: underline;
 }
 
-/* Nút Đăng nhập / Đăng ký */
 .btn-main {
     width: 100%;
     background-color: #ffffff;
     color: #8b1a1a; 
     border: none;
-    height: 60px; /* Nút to và cao hơn */
-    font-size: 20px; /* Cỡ chữ to hơn */
+    height: 60px;
+    font-size: 20px;
     font-weight: bold;
     border-radius: 10px;
-    margin-top: 25px; /* Tăng khoảng cách tách rời khỏi khối trắng */
+    margin-top: 25px;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     transition: all 0.2s;
@@ -134,7 +128,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Text chuyển đổi form */
 .toggle-text {
     margin-top: 30px;
     color: #ffffff;
@@ -152,11 +145,17 @@ body {
     text-decoration: underline;
 }
 
-/* --- Panel Phải (Ảnh nền) --- */
 .right-panel {
     flex: 1;
-    background-image: url('https://images.unsplash.com/photo-1541888073105-8fb93361e6af?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.bg_user{
+    background-image: url('../user_login_background.png');
+}
+
+.bg_admin{
+    background-image: url('../admin_login_background.png');
 }

@@ -1,4 +1,3 @@
-// Dữ liệu câu hỏi giống hệt ảnh mẫu
 const examQuestions = [
     {
         id: 1,
@@ -17,7 +16,6 @@ const examQuestions = [
     }
 ];
 
-// Tạo thêm các câu hỏi trống để lấp đầy grid cho giống ảnh
 for (let i = 4; i <= 20; i++) {
     examQuestions.push({
         id: i,
@@ -29,12 +27,11 @@ for (let i = 4; i <= 20; i++) {
 const userAnswers = {
     1: 0, 
     2: 1
-}; // Lưu trữ đáp án của người dùng
+};
 
-const flaggedQuestions = new Set(); // Lưu trữ các câu được cắm cờ
-let currentActiveId = 3; // Giả sử câu 3 đang được xem (theo ảnh mẫu)
+const flaggedQuestions = new Set();
+let currentActiveId = 3;
 
-// Hàm Render nội dung câu hỏi ra màn hình
 function renderQuestions() {
     const container = document.getElementById('questions-container');
     container.innerHTML = '';
@@ -53,7 +50,6 @@ function renderQuestions() {
             `;
         });
 
-        // Set icon cờ tuỳ trạng thái (câu 3 là cờ đen đặc theo ảnh mẫu)
         const flagClass = flaggedQuestions.has(q.id) || q.id === 3 ? 'fa-solid' : 'fa-regular';
 
         const qHtml = `
@@ -73,20 +69,16 @@ function renderQuestions() {
     });
 }
 
-// Hàm Render Grid ô vuông bên phải
 function renderGrid() {
     const grid = document.getElementById('question-grid');
     grid.innerHTML = '';
 
     examQuestions.forEach(q => {
         let classes = ['grid-item'];
-        
-        // Mô phỏng trạng thái màu sắc theo ảnh:
-        // Câu 1, 2 màu hồng nhạt (answered). Câu 3 màu đỏ đậm (active). Còn lại xám.
+
         if (q.id === currentActiveId) {
             classes.push('active');
         } else if (userAnswers[q.id] !== undefined || q.id === 1 || q.id === 2) { 
-            // Cứng code id 1, 2 thành answered để giống ảnh mẫu
             classes.push('answered');
         }
         
@@ -99,14 +91,12 @@ function renderGrid() {
     });
 }
 
-// Xử lý chọn đáp án
 function selectAnswer(questionId, optionIndex) {
     userAnswers[questionId] = optionIndex;
     renderQuestions();
     renderGrid();
 }
 
-// Xử lý cắm cờ (Flag)
 function toggleFlag(questionId) {
     if (flaggedQuestions.has(questionId)) {
         flaggedQuestions.delete(questionId);
@@ -117,15 +107,13 @@ function toggleFlag(questionId) {
     renderGrid();
 }
 
-// Cuộn tới câu hỏi khi bấm vào Grid
 function scrollToQuestion(id) {
     currentActiveId = id;
     renderGrid();
     document.getElementById(`q${id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// --- LOGIC ĐẾM NGƯỢC THỜI GIAN ---
-let totalSeconds = 30 * 60 + 25; // 30 phút 25 giây theo ảnh
+let totalSeconds = 30 * 60;
 const timerDisplay = document.getElementById('countdown');
 
 function updateTimer() {
@@ -143,38 +131,27 @@ function updateTimer() {
 }
 const timerInterval = setInterval(updateTimer, 1000);
 
-// Thay thế hoàn toàn phần xử lý Nộp bài cũ bằng code mới sau:
-
-// 1. Mở Pop-up khi nhấn nút "Nộp bài"
 function submitExam() {
     const modal = document.getElementById('submit-modal');
     modal.classList.add('active');
 }
 
-// 2. Đóng Pop-up khi nhấn "Hủy" hoặc nút "X"
 function closeModal() {
     const modal = document.getElementById('submit-modal');
     modal.classList.remove('active');
 }
 
-// 3. Xử lý khi nhấn "Đồng ý nộp"
 function confirmSubmit() {
-    // Ẩn modal đi
     closeModal();
-    
-    // Bạn có thể thêm hiệu ứng Loading ở đây trước khi chuyển trang (tùy chọn)
-    
-    // Chuyển hướng về trang kết quả
+
     window.location.href = 'exam_result.html'; 
 }
 
-// (Tùy chọn) Đóng modal khi click ra ngoài vùng xám
 document.getElementById('submit-modal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeModal();
     }
 });
 
-// Khởi tạo
 renderQuestions();
 renderGrid();

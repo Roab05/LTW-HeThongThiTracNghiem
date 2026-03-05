@@ -1,7 +1,5 @@
-// Cấu trúc dữ liệu lưu trữ câu hỏi
 let questions = [];
 
-// 1. Logic ẩn hiện chọn thời gian
 function toggleTimeInput() {
     const type = document.getElementById('exam-type').value;
     const timeSetting = document.getElementById('time-setting');
@@ -12,10 +10,9 @@ function toggleTimeInput() {
     }
 }
 
-// 2. Render danh sách câu hỏi ra màn hình
 function renderQuestions() {
     const container = document.getElementById('questions-container');
-    container.innerHTML = ''; // Xóa rỗng trước khi vẽ lại
+    container.innerHTML = '';
 
     if (questions.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #888; font-style: italic;">Chưa có câu hỏi nào. Hãy thêm thủ công hoặc nhập từ file Excel.</p>';
@@ -26,7 +23,6 @@ function renderQuestions() {
         let optionsHtml = '';
         const letters = ['A', 'B', 'C', 'D'];
 
-        // Lặp qua 4 đáp án
         q.options.forEach((opt, optIndex) => {
             const isChecked = q.correctIndex === optIndex ? 'checked' : '';
             optionsHtml += `
@@ -38,7 +34,6 @@ function renderQuestions() {
             `;
         });
 
-        // Khối HTML của 1 câu hỏi
         const qHtml = `
             <div class="q-block" id="q-${index}">
                 <div class="q-header">
@@ -57,12 +52,11 @@ function renderQuestions() {
     });
 }
 
-// 3. Các hàm tương tác với Mảng dữ liệu Câu hỏi
 function addQuestion() {
     questions.push({
         text: "",
         options: ["", "", "", ""],
-        correctIndex: 0 // Mặc định đáp án A đúng
+        correctIndex: 0 
     });
     renderQuestions();
 }
@@ -86,11 +80,9 @@ function updateCorrectAnswer(qIndex, optIndex) {
     questions[qIndex].correctIndex = optIndex;
 }
 
-// 4. Giả lập tính năng Import Excel
 function importExcelMock() {
     const fileInput = document.getElementById('excel-upload');
     if(fileInput.files.length > 0) {
-        // Giả vờ đọc file và đẩy 2 câu hỏi mẫu vào mảng
         alert("Đã đọc file Excel thành công! Đang thêm câu hỏi...");
         
         questions.push({
@@ -106,12 +98,10 @@ function importExcelMock() {
         });
 
         renderQuestions();
-        // Reset file input để có thể chọn lại file đó
         fileInput.value = ''; 
     }
 }
 
-// 5. Tính năng Lưu toàn bộ Form
 function saveExam() {
     const name = document.getElementById('exam-name').value.trim();
     if (!name) {
@@ -123,7 +113,6 @@ function saveExam() {
         return;
     }
 
-    // Ở đây thực tế sẽ dùng API gửi data lên Backend
     console.log("Exam Data to Save:", {
         name: name,
         desc: document.getElementById('exam-desc').value,
@@ -137,5 +126,4 @@ function saveExam() {
     window.location.href = 'admin_dashboard.html';
 }
 
-// Khởi tạo 1 câu hỏi trống mặc định khi mới vào trang
 addQuestion();

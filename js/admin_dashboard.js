@@ -1,18 +1,15 @@
-// Dữ liệu giả lập Kỳ thi
 let examsData = [
     { id: 1, code: "230056PCNCT", name: "Kiểm tra cuối kì - Triết học", type: "Kiểm tra", status: "Sẵn sàng" },
     { id: 2, code: "230728PCNCT", name: "Kiểm tra giữa kì - C++", type: "Kiểm tra", status: "Đã hết hạn" },
     { id: 3, code: "230070PCNCT", name: "Luyện tập đồ thị", type: "Luyện tập", status: "Chưa bắt đầu" }
 ];
 
-// Dữ liệu giả lập Sinh viên
 let usersData = [
     { id: 1, studentId: "B21DCCN001", name: "Nguyễn Văn A", class: "D21CQCN01-B", email: "nva@stu.ptit.edu.vn" },
     { id: 2, studentId: "B21DCCN002", name: "Trần Thị B", class: "D21CQCN02-B", email: "ttb@stu.ptit.edu.vn" },
     { id: 3, studentId: "B21DCCN003", name: "Lê Hoàng C", class: "D21CQCN01-B", email: "lhc@stu.ptit.edu.vn" }
 ];
 
-// 1. Logic chuyển đổi các Tab (Single Page Application)
 function switchTab(tabId, element) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     element.classList.add('active');
@@ -28,7 +25,6 @@ function switchTab(tabId, element) {
     document.getElementById('view-' + tabId).classList.add('active');
 }
 
-// 2. Logic Render Bảng Kỳ Thi
 function renderExamsTable() {
     const tbody = document.getElementById('exam-table-body');
     tbody.innerHTML = '';
@@ -51,7 +47,6 @@ function renderExamsTable() {
     });
 }
 
-// 3. Logic Render Bảng Sinh Viên
 function renderUsersTable() {
     const tbody = document.getElementById('user-table-body');
     tbody.innerHTML = '';
@@ -75,7 +70,6 @@ function renderUsersTable() {
     });
 }
 
-// 4. Các hàm Xóa (Demo mảng)
 function deleteExam(id) {
     if(confirm("Bạn có chắc chắn muốn xóa kỳ thi này?")) {
         examsData = examsData.filter(e => e.id !== id);
@@ -90,19 +84,14 @@ function deleteUser(id) {
     }
 }
 
-// 5. Logic xử lý Modal và Điều hướng (ĐÃ CẬP NHẬT)
 function openModal(type, id = null) {
     if (type === 'exam') {
-        // Nếu click từ tab Kỳ thi -> Chuyển sang trang Cập nhật kỳ thi
         if (id) {
-            // Trường hợp Sửa: Truyền ID lên URL
             window.location.href = `exam_update.html?id=${id}`;
         } else {
-            // Trường hợp Thêm mới: Chuyển trang không cần ID
             window.location.href = 'exam_update.html';
         }
     } else {
-        // Nếu click từ tab Sinh viên -> Giữ nguyên logic hiển thị Popup (vì chưa có trang riêng)
         const modal = document.getElementById('admin-modal');
         const title = document.getElementById('modal-title');
         
@@ -120,6 +109,5 @@ function saveData() {
     closeModal();
 }
 
-// Khởi tạo hiển thị dữ liệu ban đầu
 renderExamsTable();
 renderUsersTable();

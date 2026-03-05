@@ -17,11 +17,10 @@ body {
     height: 100vh;
 }
 
-/* ======== HEADER ======== */
 .exam-header {
     display: flex;
     height: 90px;
-    background-color: #d13d3d; /* Màu đỏ của phần tiêu đề */
+    background-color: #d13d3d;
     color: white;
 }
 
@@ -60,7 +59,7 @@ body {
 
 .timer-area {
     width: 250px;
-    background-color: #e45757; /* Màu đỏ nhạt hơn của ô đếm giờ */
+    background-color: #e45757;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -77,14 +76,12 @@ body {
     font-weight: bold;
 }
 
-/* ======== NỘI DUNG BÀI THI ======== */
 .exam-main {
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
-/* --- Vùng Câu hỏi (Trái) --- */
 .questions-section {
     flex: 1;
     padding: 30px 40px;
@@ -93,7 +90,6 @@ body {
     background-color: #ffffff;
 }
 
-/* Logo chìm (Watermark) */
 .questions-section::before {
     content: '';
     position: fixed;
@@ -102,16 +98,15 @@ body {
     transform: translate(-50%, -50%);
     width: 500px;
     height: 500px;
-    background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/20/PTIT_Logo.png');
+    background-image: url('ptit_logo.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    opacity: 0.04; /* Độ mờ hệt như ảnh mẫu */
+    opacity: 0.04;
     pointer-events: none;
     z-index: 0;
 }
 
-/* Styling từng câu hỏi */
 .question-block {
     position: relative;
     z-index: 1;
@@ -141,10 +136,9 @@ body {
     font-weight: bold;
 }
 
-/* Styling đáp án */
 .options-list {
     list-style: none;
-    padding-left: 28px; /* Thụt lề vào bằng icon cờ */
+    padding-left: 28px;
 }
 
 .option-item {
@@ -157,7 +151,7 @@ body {
 .option-circle {
     width: 26px;
     height: 26px;
-    background-color: #f2d4d4; /* Nền hồng nhạt */
+    background-color: #f2d4d4;
     color: #000;
     border-radius: 50%;
     display: flex;
@@ -169,16 +163,14 @@ body {
     transition: 0.2s;
 }
 
-/* Khi người dùng chọn đáp án */
 .option-item.selected .option-circle {
     background-color: #d13d3d;
     color: #ffffff;
 }
 
-/* --- Vùng Thanh điều hướng (Phải) --- */
 .sidebar-right {
     width: 250px;
-    background-color: #f2cece; /* Nền hồng của cột phải */
+    background-color: #f2cece;
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -204,7 +196,6 @@ body {
     font-weight: normal;
 }
 
-/* Lưới các ô vuông */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -214,7 +205,7 @@ body {
 }
 
 .grid-item {
-    aspect-ratio: 1; /* Giữ ô vuông */
+    aspect-ratio: 1;
     border-radius: 6px;
     display: flex;
     justify-content: center;
@@ -222,27 +213,25 @@ body {
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    background-color: #9e9e9e; /* Xám mặc định chưa làm */
-    color: #ffffff; /* CẬP NHẬT: Đổi từ transparent sang #ffffff (trắng) để hiện số */
+    background-color: #9e9e9e;
+    color: #ffffff;
     transition: 0.2s;
 }
 
-/* Trạng thái đã làm / đang xem (Giữ nguyên) */
 .grid-item.answered {
-    background-color: #f2d4d4; /* Hồng nhạt */
-    color: #333; /* Chữ màu tối */
+    background-color: #f2d4d4;
+    color: #333;
 }
 
 .grid-item.active {
-    background-color: #c44e4e; /* Đỏ đậm */
-    color: #ffffff; /* Chữ màu trắng */
+    background-color: #c44e4e;
+    color: #ffffff;
 }
 
 .grid-item.flagged {
     border: 2px solid #000;
 }
 
-/* Nút Nộp bài */
 .btn-submit {
     width: 100%;
     padding: 12px;
@@ -260,21 +249,19 @@ body {
     background-color: #b33131;
 }
 
-/* ======== MODAL (POP-UP) ======== */
 .modal-overlay {
-    display: none; /* Ẩn mặc định */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Phủ một lớp nền đen mờ */
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     justify-content: center;
     align-items: center;
 }
 
-/* Khi có class active thì sẽ hiển thị */
 .modal-overlay.active {
     display: flex;
 }
@@ -285,7 +272,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     overflow: hidden;
-    animation: fadeInDown 0.3s ease-out; /* Hiệu ứng trượt nhẹ xuống */
+    animation: fadeInDown 0.3s ease-out;
 }
 
 @keyframes fadeInDown {

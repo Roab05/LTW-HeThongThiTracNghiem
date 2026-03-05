@@ -1,4 +1,3 @@
-// Dữ liệu giả lập kết quả thi của sinh viên
 const rawData = [
     { studentId: "B21DCCN001", name: "Nguyễn Văn A", exam: "Kiểm tra cuối kì - Triết học", date: "2026-02-25", score: 8.5, type: "Triết học" },
     { studentId: "B21DCCN002", name: "Trần Thị B", exam: "Kiểm tra cuối kì - Triết học", date: "2026-02-25", score: 4.0, type: "Triết học" },
@@ -11,19 +10,16 @@ const rawData = [
 
 let currentChart = null;
 
-// Hàm chính: Tính toán, render thẻ, bảng và biểu đồ dựa trên dữ liệu truyền vào
 function updateDashboard(dataToRender) {
-    // 1. Tính toán thẻ thống kê
     const total = dataToRender.length;
     let sumScore = 0;
     let passedCount = 0;
 
-    // Phân loại điểm cho biểu đồ: <4, 4-6, 6-8, 8-10
     let dist = { '< 4': 0, '4 - 6': 0, '6 - 8': 0, '8 - 10': 0 };
 
     dataToRender.forEach(item => {
         sumScore += item.score;
-        if (item.score >= 5.0) passedCount++; // Giả sử >=5 là qua môn/hoàn thành
+        if (item.score >= 5.0) passedCount++;
 
         if (item.score < 4) dist['< 4']++;
         else if (item.score < 6) dist['4 - 6']++;
@@ -34,12 +30,10 @@ function updateDashboard(dataToRender) {
     const avg = total > 0 ? (sumScore / total).toFixed(2) : 0;
     const rate = total > 0 ? ((passedCount / total) * 100).toFixed(1) : 0;
 
-    // Cập nhật DOM thẻ thống kê
     document.getElementById('total-participants').innerText = total;
     document.getElementById('completion-rate').innerText = rate + '%';
     document.getElementById('average-score').innerText = avg;
 
-    // 2. Render Bảng dữ liệu
     const tbody = document.getElementById('result-table-body');
     tbody.innerHTML = '';
     
@@ -64,15 +58,12 @@ function updateDashboard(dataToRender) {
         });
     }
 
-    // 3. Render Biểu đồ bằng Chart.js
     renderChart(dist);
 }
 
-// Hàm vẽ biểu đồ
 function renderChart(distData) {
     const ctx = document.getElementById('scoreChart').getContext('2d');
-    
-    // Nếu biểu đồ đã tồn tại, hủy nó đi trước khi vẽ lại để tránh lỗi đè lấp
+
     if (currentChart) {
         currentChart.destroy();
     }
@@ -85,10 +76,10 @@ function renderChart(distData) {
                 label: 'Số lượng sinh viên',
                 data: [distData['< 4'], distData['4 - 6'], distData['6 - 8'], distData['8 - 10']],
                 backgroundColor: [
-                    'rgba(244, 67, 54, 0.7)',  // Đỏ (Yếu)
-                    'rgba(255, 152, 0, 0.7)',  // Cam (Trung bình)
-                    'rgba(33, 150, 243, 0.7)', // Xanh dương (Khá)
-                    'rgba(76, 175, 80, 0.7)'   // Xanh lá (Giỏi)
+                    'rgba(244, 67, 54, 0.7)',
+                    'rgba(255, 152, 0, 0.7)', 
+                    'rgba(33, 150, 243, 0.7)',
+                    'rgba(76, 175, 80, 0.7)'
                 ],
                 borderColor: [
                     '#f44336', '#ff9800', '#2196f3', '#4caf50'
@@ -103,27 +94,25 @@ function renderChart(distData) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { stepSize: 1 } // Đếm số lượng người nên dùng số nguyên
+                    ticks: { stepSize: 1 }
                 }
             },
             plugins: {
-                legend: { display: false } // Ẩn chú thích vì đã có tên trục
+                legend: { display: false }
             }
         }
     });
 }
 
-// Hàm Lọc dữ liệu
 function applyFilter() {
     const examFilter = document.getElementById('filter-exam').value;
     const startDate = document.getElementById('filter-date-start').value;
     const endDate = document.getElementById('filter-date-end').value;
 
     let filteredData = rawData.filter(item => {
-        // Lọc theo môn
+
         let matchExam = (examFilter === 'all' || item.type === examFilter);
-        
-        // Lọc theo ngày (so sánh chuỗi chuẩn YYYY-MM-DD)
+
         let matchStartDate = !startDate || item.date >= startDate;
         let matchEndDate = !endDate || item.date <= endDate;
 
@@ -133,7 +122,6 @@ function applyFilter() {
     updateDashboard(filteredData);
 }
 
-// Giả lập tính năng Xuất báo cáo
 function exportData(type) {
     if (type === 'Excel') {
         alert("Đang tạo file Excel. Báo cáo sẽ được tải xuống trong giây lát...");
@@ -142,5 +130,4 @@ function exportData(type) {
     }
 }
 
-// Khởi tạo hiển thị ban đầu với toàn bộ dữ liệu
 updateDashboard(rawData);

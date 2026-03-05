@@ -16,7 +16,6 @@ body {
     height: 100vh;
 }
 
-/* ======== SIDEBAR ======== */
 .sidebar {
     width: 260px;
     background-color: #d14040;
@@ -70,7 +69,6 @@ body {
     background-color: #f08a8a;
 }
 
-/* Sidebar Footer */
 .sidebar-footer {
     margin-top: auto;
 }
@@ -128,7 +126,6 @@ body {
     opacity: 0.8;
 }
 
-/* ======== MAIN CONTENT ======== */
 .main-content {
     flex: 1;
     padding: 30px 50px;
@@ -158,7 +155,6 @@ body {
     font-weight: bold;
 }
 
-/* Filters */
 .filters-bar {
     display: flex;
     gap: 15px;
@@ -192,7 +188,6 @@ select {
     cursor: pointer;
 }
 
-/* Tạo nút mũi tên thả xuống màu đỏ giống ảnh */
 .select-wrapper::after {
     content: '\f107';
     font-family: 'Font Awesome 6 Free';
@@ -212,7 +207,6 @@ select {
     pointer-events: none;
 }
 
-/* Thống kê */
 .stats-container {
     display: flex;
     gap: 20px;
@@ -240,7 +234,6 @@ select {
     font-weight: bold;
 }
 
-/* Danh sách bài thi (Grid layout để căn cột chuẩn xác) */
 .exam-list {
     display: flex;
     flex-direction: column;
@@ -260,7 +253,6 @@ select {
     overflow: hidden;
 }
 
-/* Dải màu đỏ bên trái mỗi dòng */
 .exam-row::before {
     content: '';
     position: absolute;
@@ -272,13 +264,12 @@ select {
     border-radius: 8px 0 0 8px;
 }
 
-/* Đổi màu dải băng cho bài quá hạn */
 .exam-row.expired::before {
     background-color: #a32a2a;
 }
 
 .exam-code {
-    padding-left: 10px; /* Cách dải màu đỏ ra một chút */
+    padding-left: 10px;
     color: #666;
 }
 
