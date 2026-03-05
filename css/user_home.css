@@ -305,3 +305,35 @@ select {
 .btn-expired:hover {
     background-color: #e09292;
 }
+
+.btn-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 15px;
+    
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    
+    border: 1px solid rgba(255, 255, 255, 0.3); 
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background-color: #ffffff;
+    color: #d14040; 
+    border-color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-logout i {
+    font-size: 18px;
+}

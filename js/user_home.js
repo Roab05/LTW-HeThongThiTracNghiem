@@ -63,6 +63,14 @@ function startExam(code, isExpired) {
     window.location.href = 'exam.html'; 
 }
 
+function handleLogout() {
+    const confirmLogout = confirm("Bạn có chắc chắn muốn đăng xuất không?");
+    
+    if (confirmLogout) {
+        window.location.href = 'user_login.html'; 
+    }
+}
+
 searchInput.addEventListener('input', filterExams);
 statusFilter.addEventListener('change', filterExams);
 typeFilter.addEventListener('change', filterExams);
