@@ -1,0 +1,77 @@
+// Dữ liệu mock giống ảnh mẫu
+const examsData = [
+    { code: "230756PCNCT", name: "Luyện tập quay lui", time: "Không giới hạn", type: "Luyện tập", duration: "90 phút", status: "Sẵn sàng" },
+    { code: "230056PCNCT", name: "Kiểm tra cuối kì", time: "8:30 25/02/2026", type: "Kiểm tra", duration: "90 phút", status: "Chưa bắt đầu" },
+    { code: "230728PCNCT", name: "Kiểm tra giữa kì", time: "9:00 22/12/2025", type: "Kiểm tra", duration: "90 phút", status: "Đã hết hạn" },
+    { code: "230070PCNCT", name: "Luyện tập đồ thị", time: "Không giới hạn", type: "Luyện tập", duration: "90 phút", status: "Sẵn sàng" }
+];
+
+const examListContainer = document.getElementById('examList');
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const typeFilter = document.getElementById('typeFilter');
+
+// Hàm Render danh sách ra HTML
+function renderExams(data) {
+    examListContainer.innerHTML = ''; // Xóa rỗng trước khi render lại
+    
+    if(data.length === 0) {
+        examListContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Không tìm thấy bài thi nào phù hợp.</p>';
+        return;
+    }
+
+    data.forEach(exam => {
+        const isExpired = exam.status === "Đã hết hạn";
+        const btnClass = isExpired ? "btn-action btn-expired" : "btn-action";
+        const btnText = isExpired ? "Quá hạn" : "Bắt đầu";
+        const rowClass = isExpired ? "exam-row expired" : "exam-row";
+
+        const rowHTML = `
+            <div class="${rowClass}">
+                <div class="exam-code">${exam.code}</div>
+                <div class="exam-name">${exam.name}</div>
+                <div class="exam-time">${exam.time}</div>
+                <div class="exam-type">${exam.type}</div>
+                <div class="exam-duration">${exam.duration}</div>
+                <div class="exam-action">
+                    <button class="${btnClass}" onclick="startExam('${exam.code}', ${isExpired})">${btnText}</button>
+                </div>
+            </div>
+        `;
+        examListContainer.insertAdjacentHTML('beforeend', rowHTML);
+    });
+}
+
+// Hàm lọc dữ liệu
+function filterExams() {
+    const keyword = searchInput.value.toLowerCase();
+    const statusVal = statusFilter.value;
+    const typeVal = typeFilter.value;
+
+    const filteredData = examsData.filter(exam => {
+        const matchKeyword = exam.name.toLowerCase().includes(keyword) || exam.code.toLowerCase().includes(keyword);
+        const matchStatus = statusVal === 'all' || exam.status === statusVal;
+        const matchType = typeVal === 'all' || exam.type === typeVal;
+        return matchKeyword && matchStatus && matchType;
+    });
+
+    renderExams(filteredData);
+}
+
+// Thay thế hàm startExam trong js/main.js bằng đoạn này:
+function startExam(code, isExpired) {
+    if (isExpired) {
+        alert("Kỳ thi này đã quá hạn!");
+        return;
+    }
+    // Chuyển hướng sang trang làm bài thi
+    window.location.href = 'exam.html'; 
+}
+
+// Lắng nghe sự kiện thay đổi trên các ô nhập/chọn
+searchInput.addEventListener('input', filterExams);
+statusFilter.addEventListener('change', filterExams);
+typeFilter.addEventListener('change', filterExams);
+
+// Khởi tạo hiển thị ban đầu
+renderExams(examsData);

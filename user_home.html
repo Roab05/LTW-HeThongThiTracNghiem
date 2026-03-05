@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách kì thi - PTIT</title>
+    <link rel="stylesheet" href="css/user_home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <h1 class="sidebar-title">Trang chủ</h1>
+            
+            <div class="menu-section">
+                <h3>Học tập & thi cử</h3>
+                <ul class="menu-list">
+                    <li><a href="#">Lịch thi</a></li>
+                    <li><a href="#" class="active">Danh sách bài thi</a></li>
+                    <li><a href="#">Danh sách bài tập</a></li>
+                    <li><a href="#">Thống kê</a></li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Quản lý tài khoản</h3>
+                <ul class="menu-list">
+                    <li><a href="#">Bảng điểm</a></li>
+                    <li><a href="#">Lịch sử làm bài</a></li>
+                    <li><a href="#">Thời khóa biểu</a></li>
+                    <li><a href="#">Tiến trình học tập</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-question-circle"></i> Hỗ trợ</a>
+                    <a href="#"><i class="fas fa-book"></i> Hướng dẫn</a>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <img src="ptit_logo.png" alt="Avatar">
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Tôi yêu PTIT</span>
+                        <span class="user-email">toiyeuptit@stut.ptit.edu...</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header">
+                <img src="ptit_logo.png" alt="PTIT Logo" class="page-logo">
+                <h2 class="page-title">Danh sách kì thi</h2>
+            </header>
+
+            <div class="filters-bar">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên hoặc mã">
+                <div class="select-wrapper">
+                    <select id="statusFilter">
+                        <option value="all">Tất cả</option>
+                        <option value="Sẵn sàng">Sẵn sàng</option>
+                        <option value="Chưa bắt đầu">Chưa bắt đầu</option>
+                        <option value="Đã hết hạn">Đã hết hạn</option>
+                    </select>
+                </div>
+                <div class="select-wrapper">
+                    <select id="typeFilter">
+                        <option value="Luyện tập">Luyện tập</option>
+                        <option value="Kiểm tra">Kiểm tra</option>
+                        <option value="all">Tất cả loại</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng số bài thi</div>
+                    <div class="stat-value">15</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sẵn sàng</div>
+                    <div class="stat-value">6</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Chưa bắt đầu</div>
+                    <div class="stat-value">4</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đã hết hạn</div>
+                    <div class="stat-value">5</div>
+                </div>
+            </div>
+
+            <div class="exam-list" id="examList">
+                </div>
+        </main>
+    </div>
+
+    <script src="js/user_home.js"></script>
+</body>
+</html>

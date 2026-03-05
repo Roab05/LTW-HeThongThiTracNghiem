@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả bài thi - PTIT</title>
+    <link rel="stylesheet" href="css/exam_result.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="result-container">
+        <header class="result-header">
+            <div class="logo-area">
+                <img src="ptit_logo.png" alt="PTIT Logo">
+            </div>
+            <div class="title-area">
+                <h2>Kết quả bài thi: Kiểm tra cuối kì II năm 2025 - 2026</h2>
+                <h3>Môn học: Triết học Mác - Lênin</h3>
+            </div>
+            <div class="action-area">
+                <button class="btn-home" onclick="window.location.href='main.html'">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </button>
+            </div>
+        </header>
+
+        <main class="result-main">
+            <section class="stats-section">
+                <div class="score-card">
+                    <div class="score-label">Điểm số của bạn</div>
+                    <div class="score-value" id="final-score">0.0</div>
+                    <div class="score-out-of">/ 10</div>
+                </div>
+                
+                <div class="details-card">
+                    <h3 class="details-title">Thống kê chi tiết</h3>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar" id="accuracy-bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="accuracy-text" id="accuracy-text">Tỷ lệ đúng: 0%</div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box correct">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="stat-info">
+                                <span class="stat-num" id="stat-correct">0</span>
+                                <span class="stat-name">Câu đúng</span>
+                            </div>
+                        </div>
+                        <div class="stat-box incorrect">
+                            <i class="fas fa-times-circle"></i>
+                            <div class="stat-info">
+                                <span class="stat-num" id="stat-wrong">0</span>
+                                <span class="stat-name">Câu sai</span>
+                            </div>
+                        </div>
+                        <div class="stat-box skipped">
+                            <i class="fas fa-minus-circle"></i>
+                            <div class="stat-info">
+                                <span class="stat-num" id="stat-skipped">0</span>
+                                <span class="stat-name">Bỏ qua</span>
+                            </div>
+                        </div>
+                        <div class="stat-box total">
+                            <i class="fas fa-list-ol"></i>
+                            <div class="stat-info">
+                                <span class="stat-num" id="stat-total">0</span>
+                                <span class="stat-name">Tổng câu hỏi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="review-section">
+                <h3 class="review-title"><i class="fas fa-search"></i> Xem lại bài làm chi tiết</h3>
+                <div id="review-container">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/exam_result.js"></script>
+</body>
+</html>

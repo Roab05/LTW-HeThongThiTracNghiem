@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả Sinh viên - Admin PTIT</title>
+    <link rel="stylesheet" href="css/admin_view_student_result.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="student-result-container">
+        <header class="top-header no-print">
+            <div class="logo-area">
+                <img src="ptit_logo.png" alt="Logo">
+                <h2>Quản trị Hệ thống</h2>
+            </div>
+            <div class="action-area">
+                <button class="btn-back" onclick="window.location.href='admin_dashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="page-title no-print">
+                <h2><i class="fas fa-user-graduate"></i> Tra cứu kết quả sinh viên</h2>
+            </div>
+
+            <section class="search-section card-panel no-print">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Nhập Mã hoặc Tên sinh viên (VD: Nguyễn Văn A)...">
+                    <button class="btn-search" onclick="searchStudent()">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                </div>
+                <p class="search-hint">Gợi ý tìm kiếm: Theo tên (<strong>B21DCCN001</strong>) hoặc theo mã sinh viên (<strong>Nguyễn Văn A</strong>)</p>
+            </section>
+
+            <section id="search-results-section" class="card-panel no-print" style="display: none;">
+                <h3 class="panel-title">Kết quả tìm kiếm</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã SV</th>
+                            <th>Họ và Tên</th>
+                            <th>Lớp</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results-body">
+                        </tbody>
+                </table>
+            </section>
+
+            <div id="result-area" style="display: none;">
+
+                <div class="back-to-search-wrap no-print" style="margin-bottom: 15px;">
+                    <button class="btn-back-search" onclick="backToSearchResults()">
+                        <i class="fas fa-undo"></i> Quay lại danh sách tìm kiếm
+                    </button>
+                </div>
+                
+                <section class="student-profile card-panel print-section">
+                    <div class="profile-header">
+                        <div class="avatar"><i class="fas fa-user"></i></div>
+                        <div class="info">
+                            <h3 id="student-name">Tên Sinh Viên</h3>
+                            <p>Mã SV: <strong id="student-id">...</strong> | Lớp: <strong id="student-class">...</strong></p>
+                        </div>
+                        <div class="print-action no-print">
+                            <button class="btn-print" onclick="window.print()">
+                                <i class="fas fa-print"></i> In báo cáo
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="history-section card-panel print-section">
+                    <h3 class="panel-title">Lịch sử tham gia kỳ thi</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kỳ thi</th>
+                                <th>Thời gian tham gia</th>
+                                <th>Điểm số</th>
+                                <th>Trạng thái</th>
+                                <th class="no-print">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            </tbody>
+                    </table>
+                </section>
+
+                <section id="exam-detail-section" class="detail-section card-panel print-section" style="display: none;">
+                    <div class="detail-header">
+                        <h3 class="panel-title" id="detail-exam-name">Chi tiết bài làm: ...</h3>
+                        <button class="btn-close-detail no-print" onclick="closeDetail()">
+                            <i class="fas fa-times"></i> Đóng chi tiết
+                        </button>
+                    </div>
+                    
+                    <div class="score-summary">
+                        <div class="summary-item">Điểm số: <strong id="detail-score" class="text-red">0.0</strong></div>
+                        <div class="summary-item">Thời gian nộp: <strong id="detail-time">...</strong></div>
+                    </div>
+
+                    <div id="questions-container">
+                        </div>
+                </section>
+
+            </div> <div id="not-found-msg" class="not-found no-print" style="display: none;">
+                <i class="fas fa-search-minus"></i>
+                <p>Không tìm thấy thông tin sinh viên. Vui lòng thử lại!</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/admin_view_student_result.js"></script>
+</body>
+</html>
