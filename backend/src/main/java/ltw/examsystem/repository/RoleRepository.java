@@ -1,0 +1,14 @@
+package ltw.examsystem.repository;
+
+import ltw.examsystem.entity.ERole;
+import ltw.examsystem.entity.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RoleRepository extends JpaRepository<Role, Integer> {
+    // Hàm này rất quan trọng để cấp quyền khi đăng ký user mới
+    Optional<Role> findByName(ERole name);
+}

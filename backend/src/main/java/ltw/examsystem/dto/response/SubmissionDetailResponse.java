@@ -1,0 +1,16 @@
+package ltw.examsystem.dto.response;
+
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter @Setter
+public class SubmissionDetailResponse {
+    private Long submissionId;
+    private String examTitle;
+    private Double score;
+    private LocalDateTime submitTime;
+
+    private List<QuestionResultResponse> questionResults;
+}
