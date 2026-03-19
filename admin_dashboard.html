@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PTIT</title>
+    <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/ptit_logo.png" alt="Logo" class="admin-logo">
+                <h2>Admin Panel</h2>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="switchTab('dashboard', this)">
+                    <i class="fas fa-chart-pie"></i> Thống kê tổng quan
+                </li>
+                <li class="nav-item" onclick="switchTab('exams', this)">
+                    <i class="fas fa-file-alt"></i> Quản lý kỳ thi
+                </li>
+                <li class="nav-item" onclick="switchTab('users', this)">
+                    <i class="fas fa-users"></i> Quản lý sinh viên
+                </li>
+                <li class="nav-item" onclick="window.location.href='statistics.html'">
+                    <i class="fas fa-chart-line"></i> Thống kê chi tiết
+                </li>
+                <li class="nav-item" onclick="window.location.href='admin_view_student_result.html'">
+                    <i class="fas fa-user-graduate"></i> Tra cứu kết quả
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <div class="avatar"><i class="fas fa-user-shield"></i></div>
+                    <div class="info">
+                        <div class="name">Quản trị viên</div>
+                        <div class="role">System Admin</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="window.location.href='admin_login.html'">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <h2 id="page-title">Thống kê tổng quan</h2>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Tìm kiếm nhanh...">
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <section id="view-dashboard" class="view-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: #e3f2fd; color: #1976d2;"><i class="fas fa-users"></i></div>
+                            <div class="stat-info">
+                                <h3>Tổng Sinh Viên</h3>
+                                <p>1,245</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: #fbe9e7; color: #d32f2f;"><i class="fas fa-file-signature"></i></div>
+                            <div class="stat-info">
+                                <h3>Tổng Kỳ Thi</h3>
+                                <p>48</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: #e8f5e9; color: #388e3c;"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>Tỷ lệ hoàn thành</h3>
+                                <p>85.4%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: #fff3e0; color: #f57c00;"><i class="fas fa-star"></i></div>
+                            <div class="stat-info">
+                                <h3>Điểm trung bình</h3>
+                                <p>7.2 / 10</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-panel mt-30">
+                        <h3 class="panel-title">Tiến độ các kỳ thi đang diễn ra</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã kỳ thi</th>
+                                    <th>Tên kỳ thi</th>
+                                    <th>Số lượt tham gia</th>
+                                    <th>Điểm TB</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>230056PCNCT</td>
+                                    <td>Kiểm tra cuối kì - Triết học</td>
+                                    <td>450 / 500</td>
+                                    <td><span class="badge success">7.8</span></td>
+                                </tr>
+                                <tr>
+                                    <td>230728PCNCT</td>
+                                    <td>Kiểm tra giữa kì - Lập trình C++</td>
+                                    <td>120 / 120</td>
+                                    <td><span class="badge warning">6.5</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="view-exams" class="view-section">
+                    <div class="card-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Danh sách Kỳ thi</h3>
+                            <button class="btn-add" onclick="openModal('exam')"><i class="fas fa-plus"></i> Thêm kỳ thi mới</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã MH</th>
+                                    <th>Tên bài thi</th>
+                                    <th>Loại</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exam-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="view-users" class="view-section">
+                    <div class="card-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Danh sách Sinh viên</h3>
+                            <button class="btn-add" onclick="openModal('user')"><i class="fas fa-user-plus"></i> Thêm sinh viên</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã SV</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Lớp</th>
+                                    <th>Email</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Thêm mới</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><i>Form nhập liệu sẽ được tạo động dựa theo Backend. Nhấn "Lưu lại" để demo cập nhật bảng.</i></p>
+                <div style="margin-top: 15px; text-align: center;">
+                    <i class="fas fa-cogs" style="font-size: 40px; color: #ccc;"></i>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Hủy</button>
+                <button class="btn-save" onclick="saveData()">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập / Đăng ký - PTIT</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            
+            <div class="form-wrapper" id="login-wrapper">
+                <div class="form-card">
+                    <div class="logo-box">
+                        <img src="assets/ptit_logo.png" alt="PTIT Logo">
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="login-username" placeholder="Tên đăng nhập">
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Mật khẩu">
+                    </div>
+                    
+                    <div class="forgot-pwd-container">
+                        <a href="#" class="forgot-password">Quên mật khẩu</a>
+                    </div>
+                </div>
+                
+                <button class="btn-main" id="btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
+                
+                <p class="toggle-text">
+                    Chưa có tài khoản? <a href="#" onclick="toggleForm('register')">Đăng ký</a>
+                </p>
+            </div>
+
+            <div class="form-wrapper" id="register-wrapper" style="display: none;">
+                <div class="form-card">
+                    <div class="logo-box">
+                        <img src="assets/ptit_logo.png" alt="PTIT Logo">
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="reg-username" placeholder="Tên người dùng">
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="reg-email" placeholder="Email">
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="reg-password" placeholder="Mật khẩu">
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="reg-confirm-password" placeholder="Xác nhận mật khẩu">
+                    </div>
+                </div>
+                
+                <button class="btn-main" id="btn-register" onclick="handleRegister()">ĐĂNG KÝ</button>
+                
+                <p class="toggle-text">
+                    Đã có tài khoản? <a href="#" onclick="toggleForm('login')">Đăng nhập</a>
+                </p>
+            </div>
+
+        </div>
+
+        <div class="right-panel bg-admin"></div>
+    </div>
+
+    <script src="js/admin_login.js"></script>
+</body>
+</html>

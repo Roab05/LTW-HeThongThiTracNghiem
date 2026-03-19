@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập nhật Kỳ thi - Admin PTIT</title>
+    <link rel="stylesheet" href="css/exam_update.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="update-container">
+        <header class="top-header">
+            <div class="logo-area">
+                <a href="admin_dashboard.html">
+                    <img src="assets/ptit_logo.png" alt="PTIT Logo">
+                </a>
+                <h2>Quản trị Hệ thống</h2>
+            </div>
+            <div class="action-area">
+                <button class="btn-back" onclick="window.location.href='admin_dashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="page-title">
+                <h2><i class="fas fa-edit"></i> Tạo / Chỉnh sửa Kỳ thi</h2>
+                <button class="btn-save-main" onclick="saveExam()">
+                    <i class="fas fa-save"></i> Lưu kỳ thi
+                </button>
+            </div>
+
+            <div class="content-grid">
+                <section class="card-panel general-info">
+                    <h3 class="panel-title">Thông tin chung</h3>
+                    
+                    <div class="form-group">
+                        <label>Tên kỳ thi <span class="required">*</span></label>
+                        <input type="text" id="exam-name" class="form-control" placeholder="Nhập tên bài thi...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea id="exam-desc" class="form-control" rows="3" placeholder="Nhập mô tả cho bài thi..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Loại kỳ thi <span class="required">*</span></label>
+                            <select id="exam-type" class="form-control" onchange="toggleTimeInput()">
+                                <option value="free">Luyện tập (Tự do)</option>
+                                <option value="fixed">Kiểm tra (Thời gian cụ thể)</option>
+                            </select>
+                        </div>
+                        <div class="form-group half">
+                            <label>Thời lượng (phút) <span class="required">*</span></label>
+                            <input type="number" id="exam-duration" class="form-control" value="90" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="time-setting" style="display: none;">
+                        <label>Thời gian bắt đầu <span class="required">*</span></label>
+                        <input type="datetime-local" id="exam-start-time" class="form-control">
+                    </div>
+                </section>
+
+                <section class="card-panel question-info">
+                    <div class="panel-header-flex">
+                        <h3 class="panel-title">Danh sách câu hỏi</h3>
+                        <div class="question-actions">
+                            <label for="excel-upload" class="btn-import">
+                                <i class="fas fa-file-excel"></i> Nhập từ Excel
+                            </label>
+                            <input type="file" id="excel-upload" accept=".xlsx, .xls" style="display: none;" onchange="importExcelMock()">
+                            
+                            <button class="btn-add-q" onclick="addQuestion()">
+                                <i class="fas fa-plus"></i> Thêm câu hỏi
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="questions-container">
+                        </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/exam_update.js"></script>
+</body>
+</html>

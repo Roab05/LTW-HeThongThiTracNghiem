@@ -1,0 +1,161 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.left-panel {
+    width: 31%;
+    min-width: 400px;
+    background-color: #cb3e3e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 45px;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 500px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-card {
+    background-color: #ffffff;
+    width: 100%;
+    border-radius: 12px;
+    padding: 40px 30px 20px 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.logo-box {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+.logo-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    background-color: #f4eae9;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 0 15px;
+    height: 55px;
+}
+
+.input-group i {
+    color: #e54d4d;
+    font-size: 18px;
+    width: 25px;
+    text-align: left;
+}
+
+.input-group input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+}
+
+.input-group input::placeholder {
+    color: #b3a5a5;
+}
+
+.forgot-pwd-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.forgot-password {
+    color: #8b1a1a;
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.btn-main {
+    width: 100%;
+    background-color: #ffffff;
+    color: #8b1a1a; 
+    border: none;
+    height: 60px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-top: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+}
+
+.btn-main:hover {
+    background-color: #f5f5f5;
+    transform: translateY(-2px);
+}
+
+.toggle-text {
+    margin-top: 30px;
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.toggle-text a {
+    color: #ffffff;
+    font-style: italic;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.toggle-text a:hover {
+    text-decoration: underline;
+}
+
+.right-panel {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.bg-user{
+    background-image: url('../assets/user_login_background.png');
+}
+
+.bg-admin{
+    background-image: url('../assets/admin_login_background.png');
+}
