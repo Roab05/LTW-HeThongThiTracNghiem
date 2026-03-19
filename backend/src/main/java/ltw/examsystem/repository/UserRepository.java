@@ -4,6 +4,7 @@ import ltw.examsystem.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,6 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
 
-    // (Tùy chọn) Tìm user theo mã sinh viên
-    Optional<User> findByStudentId(String studentId);
+    List<User> findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(String username, String studentId);
 }

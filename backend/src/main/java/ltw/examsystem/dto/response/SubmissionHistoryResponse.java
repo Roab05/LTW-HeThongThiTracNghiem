@@ -12,4 +12,5 @@ public class SubmissionHistoryResponse {
     private Double score;
     private Integer correctAnswers;
     private Integer totalQuestions;
+    private String status;
 }

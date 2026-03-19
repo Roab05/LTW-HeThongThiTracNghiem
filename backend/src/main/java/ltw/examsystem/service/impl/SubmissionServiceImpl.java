@@ -184,6 +184,13 @@ public class SubmissionServiceImpl implements SubmissionService {
             dto.setCorrectAnswers(sub.getCorrectAnswers());
             dto.setTotalQuestions(sub.getTotalQuestions());
             dto.setSubmitTime(sub.getSubmitTime());
+
+            if (sub.getSubmitTime() != null) {
+                dto.setStatus("Hoàn thành");
+            } else {
+                dto.setStatus("Không hoàn thành/Đang làm");
+            }
+
             return dto;
         }).collect(Collectors.toList());
     }
