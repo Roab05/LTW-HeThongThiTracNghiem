@@ -19,7 +19,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Tiêm bean đã tạo ở Bước 2
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
@@ -42,7 +42,7 @@ public class AuthController {
         return ResponseEntity.ok("Đăng ký thành công!");
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         Optional<User> userOptional = userRepository.findByUsername(loginRequest.getUsername());
 

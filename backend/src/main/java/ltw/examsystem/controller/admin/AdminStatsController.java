@@ -35,10 +35,8 @@ public class AdminStatsController {
     private UserRepository userRepository;
     @Autowired
     private ExamRepository examRepository;
-
     @Autowired
     private ExcelService excelService;
-
     @Autowired
     private PDFReportService pdfReportService;
 
@@ -119,7 +117,7 @@ public class AdminStatsController {
         return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/export")
+    @GetMapping("/export-excel")
     public ResponseEntity<byte[]> exportToExcel(
             @RequestParam(required = false) Long examId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -145,9 +143,11 @@ public class AdminStatsController {
     public ResponseEntity<byte[]> exportToPdf(
             @RequestParam(required = false) Long examId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) throws IOException {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) Double minScore,
+            @RequestParam(required = false) Double maxScore) throws IOException {
 
-        List<Submission> results = submissionRepository.filterSubmissions(examId, startDate, endDate, null, null);
+        List<Submission> results = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore);
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("total", results.size());

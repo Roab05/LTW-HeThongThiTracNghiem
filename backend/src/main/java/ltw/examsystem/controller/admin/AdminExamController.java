@@ -2,8 +2,6 @@ package ltw.examsystem.controller.admin;
 
 import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.request.QuestionRequest;
-import ltw.examsystem.dto.response.AnswerOptionResponse;
-import ltw.examsystem.dto.response.QuestionResponse;
 import ltw.examsystem.entity.AnswerOption;
 import ltw.examsystem.entity.Exam;
 import ltw.examsystem.entity.Question;
@@ -97,24 +95,7 @@ public class AdminExamController {
             }).collect(Collectors.toList());
 
             question.setOptions(options);
-
-            Question savedQuestion = questionRepository.save(question);
-
-            QuestionResponse responseDTO = new QuestionResponse();
-            responseDTO.setId(savedQuestion.getId());
-            responseDTO.setContent(savedQuestion.getContent());
-
-            List<AnswerOptionResponse> optionResponses = savedQuestion.getOptions().stream().map(opt -> {
-                AnswerOptionResponse optRes = new AnswerOptionResponse();
-                optRes.setId(opt.getId());
-                optRes.setContent(opt.getContent());
-                return optRes;
-            }).collect(Collectors.toList());
-
-            responseDTO.setOptions(optionResponses);
-
-            return ResponseEntity.ok(responseDTO);
-
+            return ResponseEntity.ok(questionRepository.save(question));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -139,23 +120,7 @@ public class AdminExamController {
                 question.getOptions().add(opt);
             });
 
-            Question savedQuestion = questionRepository.save(question);
-
-            QuestionResponse responseDTO = new QuestionResponse();
-            responseDTO.setId(savedQuestion.getId());
-            responseDTO.setContent(savedQuestion.getContent());
-
-            List<AnswerOptionResponse> optionResponses = savedQuestion.getOptions().stream().map(opt -> {
-                AnswerOptionResponse optRes = new AnswerOptionResponse();
-                optRes.setId(opt.getId());
-                optRes.setContent(opt.getContent());
-                return optRes;
-            }).collect(Collectors.toList());
-
-            responseDTO.setOptions(optionResponses);
-
-            return ResponseEntity.ok(responseDTO);
-
+            return ResponseEntity.ok(questionRepository.save(question));
         }).orElse(ResponseEntity.notFound().build());
     }
 

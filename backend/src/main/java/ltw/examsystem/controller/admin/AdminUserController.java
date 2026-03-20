@@ -1,6 +1,7 @@
 package ltw.examsystem.controller.admin;
 
 import ltw.examsystem.dto.response.SubmissionDetailResponse;
+import ltw.examsystem.dto.response.UserResponse;
 import ltw.examsystem.entity.User;
 import ltw.examsystem.repository.UserRepository;
 import ltw.examsystem.dto.response.SubmissionHistoryResponse;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -37,52 +39,53 @@ public class AdminUserController {
      * Requirement b: Lấy danh sách tất cả người dùng (sinh viên)
      */
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(convertToDtoList(users));
     }
 
     /**
      * Requirement e: Tìm kiếm sinh viên theo tên hoặc email
      */
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String keyword) {
-        // Cập nhật để tìm cả theo Username và StudentId
-        return ResponseEntity.ok(userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(keyword, keyword));
+    public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam String keyword) {
+        List<User> users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(keyword, keyword);
+        return ResponseEntity.ok(convertToDtoList(users));
     }
 
     /**
      * Requirement b: Thêm mới một tài khoản sinh viên
      */
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body("Tên đăng nhập đã tồn tại!");
+            return ResponseEntity.badRequest().build();
         }
-        // Mã hóa mật khẩu trước khi lưu
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return ResponseEntity.ok(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(convertToDto(savedUser));
     }
 
     /**
      * Requirement b: Chỉnh sửa thông tin sinh viên
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    @PutMapping("/update/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         return userRepository.findById(id).map(user -> {
             user.setUsername(userDetails.getUsername());
             user.setEmail(userDetails.getEmail());
-            // Chỉ cập nhật mật khẩu nếu Admin nhập mật khẩu mới
             if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
             }
-            return ResponseEntity.ok(userRepository.save(user));
+            User updatedUser = userRepository.save(user);
+            return ResponseEntity.ok(convertToDto(updatedUser));
         }).orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * Requirement b: Xóa tài khoản sinh viên
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userRepository.findById(id).map(user -> {
             userRepository.delete(user);
@@ -117,8 +120,24 @@ public class AdminUserController {
         byte[] pdfBytes = pdfReportService.exportIndividualResultToPdf(submissionId);
 
         return ResponseEntity.ok()
+
+
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=phieu_diem_sinh_vien.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
+    }
+
+    // --- Hàm bổ trợ để chuyển đổi Entity sang DTO ---
+    private UserResponse convertToDto(User user) {
+        UserResponse dto = new UserResponse();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setStudentId(user.getStudentId()); // Giả định thực thể User có trường studentId
+        return dto;
+    }
+
+    private List<UserResponse> convertToDtoList(List<User> users) {
+        return users.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 }

@@ -52,9 +52,6 @@ public class StudentExamController {
         return ResponseEntity.ok(summaryList);
     }
 
-    /**
-     * API 2: Lấy chi tiết đề thi (Đã giấu đáp án đúng) để sinh viên làm bài
-     */
     @GetMapping("/{examId}")
     public ResponseEntity<ExamDetailResponse> getExamDetails(@PathVariable Long examId) {
         ExamDetailResponse response = examService.getExamDetailsForStudent(examId);

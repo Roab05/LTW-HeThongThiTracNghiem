@@ -21,6 +21,12 @@ public class StudentSubmissionController {
     @Autowired
     private SubmissionService submissionService;
 
+    @PostMapping
+    public ResponseEntity<Long> startExam(@RequestBody StartExamRequest request) {
+        // Trả về ID của lần nộp bài mới được tạo
+        return ResponseEntity.ok(submissionService.startExam(request));
+    }
+
     /**
      * API 1: Nộp bài thi và nhận điểm ngay lập tức
      */
@@ -44,11 +50,6 @@ public class StudentSubmissionController {
     @GetMapping("/{submissionId}")
     public ResponseEntity<SubmissionDetailResponse> getSubmissionDetail(@PathVariable Long submissionId) {
         return ResponseEntity.ok(submissionService.getSubmissionDetail(submissionId));
-    }
-
-    @PostMapping("/start")
-    public ResponseEntity<Long> startExam(@RequestBody StartExamRequest request) {
-        return ResponseEntity.ok(submissionService.startExam(request));
     }
 
     @GetMapping("/{submissionId}/time-left")

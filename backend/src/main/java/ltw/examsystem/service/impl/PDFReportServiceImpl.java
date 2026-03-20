@@ -1,6 +1,7 @@
 package ltw.examsystem.service.impl;
 
 import com.lowagie.text.*;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import ltw.examsystem.dto.response.QuestionResultResponse;
@@ -30,26 +31,27 @@ public class PDFReportServiceImpl implements PDFReportService {
 
         document.open();
 
-        // Cấu hình Font và Tiêu đề
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Paragraph title = new Paragraph("BAO CAO THONG KE KET QUA THI (PDF)", fontTitle);
+        BaseFont bf = BaseFont.createFont("src/main/resources/fonts/times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(bf, 18, Font.BOLD);
+        Font normalFont = new Font(bf, 13);
+        Paragraph title = new Paragraph("BÁO CÁO THỐNG KÊ KẾT QUẢ THI", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(new Paragraph(" "));
 
         // Thông tin tóm tắt
-        document.add(new Paragraph("Tong so luot thi: " + summaryData.get("total")));
-        document.add(new Paragraph("Diem trung binh: " + summaryData.get("average")));
+        document.add(new Paragraph("Tổng số lượt thi: " + summaryData.get("total"), normalFont));
+        document.add(new Paragraph("Điểm trung bình: " + summaryData.get("average"), normalFont));
         document.add(new Paragraph(" "));
 
         // Bảng dữ liệu
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
         table.addCell("STT");
-        table.addCell("Sinh vien");
-        table.addCell("Ky thi");
-        table.addCell("Diem so");
-        table.addCell("Thoi gian");
+        table.addCell("Sinh viên");
+        table.addCell("Kỳ thi");
+        table.addCell("Điểm số");
+        table.addCell("Thời gian");
 
         int count = 1;
         for (Submission s : submissions) {
@@ -76,29 +78,31 @@ public class PDFReportServiceImpl implements PDFReportService {
         document.open();
 
         // 2. Vẽ Tiêu đề và Thông tin chung
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20);
-        Paragraph title = new Paragraph("PHIEU KET QUA BAI THI", fontTitle);
+        BaseFont bf = BaseFont.createFont("src/main/resources/fonts/times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(bf, 18, Font.BOLD);
+        Font normalFont = new Font(bf, 13);
+        Paragraph title = new Paragraph("PHIẾU KẾT QUẢ BÀI THI", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(new Paragraph(" "));
 
-        document.add(new Paragraph("Ky thi: " + detail.getExamTitle()));
-        document.add(new Paragraph("Thoi gian nop: " + detail.getSubmitTime()));
-        document.add(new Paragraph("Diem so: " + detail.getScore() + "/10.0"));
+        document.add(new Paragraph("Kỳ thi: " + detail.getExamTitle(), normalFont));
+        document.add(new Paragraph("Thời gian nộp: " + detail.getSubmitTime(), normalFont));
+        document.add(new Paragraph("Điểm số: " + detail.getScore() + "/10", normalFont));
         document.add(new Paragraph("-----------------------------------------------------------------------"));
         document.add(new Paragraph(" "));
 
         // 3. Liệt kê chi tiết từng câu hỏi (Requirement e)
         int i = 1;
         for (QuestionResultResponse q : detail.getQuestionResults()) {
-            Paragraph pQuestion = new Paragraph("Cau " + i + ": " + q.getContent(),
-                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
+            Paragraph pQuestion = new Paragraph("Câu " + i + ": " + q.getContent(),
+                    normalFont);
             document.add(pQuestion);
 
             // Hiển thị đáp án đã chọn và đáp án đúng
-            String statusText = q.getIsCorrect() ? "[Dung]" : "[Sai]";
-            document.add(new Paragraph("   - Trang thai: " + statusText));
-            document.add(new Paragraph("   - Giai thich: " + q.getExplanation())); // Giải thích từ DB
+            String statusText = q.getIsCorrect() ? "[Đúng]" : "[Sai]";
+            document.add(new Paragraph("   - Trạng thái: " + statusText, normalFont));
+            document.add(new Paragraph("   - Giải thích: " + q.getExplanation(), normalFont)); // Giải thích từ DB
             document.add(new Paragraph(" "));
             i++;
         }
