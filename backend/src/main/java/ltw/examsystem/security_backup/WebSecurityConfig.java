@@ -1,21 +1,21 @@
-//package ltw.examsystem.security;
+//package ltw.examsystem.security_backup;
 //
-//import ltw.examsystem.security.jwt.AuthEntryPointJwt;
-//import ltw.examsystem.security.jwt.AuthTokenFilter;
-//import ltw.examsystem.security.services.UserDetailsServiceImpl;
+//import ltw.examsystem.security_backup.jwt.AuthEntryPointJwt;
+//import ltw.examsystem.security_backup.jwt.AuthTokenFilter;
+//import ltw.examsystem.security_backup.services.UserDetailsServiceImpl;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.authentication.AuthenticationManager;
-//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import org.springframework.security_backup.authentication.AuthenticationManager;
+//import org.springframework.security_backup.authentication.dao.DaoAuthenticationProvider;
+//import org.springframework.security_backup.config.annotation.authentication.configuration.AuthenticationConfiguration;
+//import org.springframework.security_backup.config.annotation.method.configuration.EnableMethodSecurity;
+//import org.springframework.security_backup.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security_backup.config.http.SessionCreationPolicy;
+//import org.springframework.security_backup.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security_backup.crypto.password.PasswordEncoder;
+//import org.springframework.security_backup.web.SecurityFilterChain;
+//import org.springframework.security_backup.web.authentication.UsernamePasswordAuthenticationFilter;
 //
 //@Configuration
 //@EnableMethodSecurity

@@ -21,4 +21,13 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     List<Exam> findByFilters(@Param("title") String title,
                              @Param("status") ExamStatus status,
                              @Param("type") ExamType type);
+
+    // Dành cho Sinh viên: Chỉ lấy các bài thi có isPublished = true
+    @Query("SELECT e FROM Exam e WHERE e.isPublished = true " +
+            "AND (:title IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+            "AND (:status IS NULL OR e.status = :status) " +
+            "AND (:type IS NULL OR e.type = :type)")
+    List<Exam> findExamsForStudent(@Param("title") String title,
+                                   @Param("status") ExamStatus status,
+                                   @Param("type") ExamType type);
 }

@@ -1,21 +1,22 @@
 package ltw.examsystem.controller.admin;
 
-import ltw.examsystem.dto.response.SubmissionDetailResponse;
+import ltw.examsystem.dto.request.CreateUserRequest;
 import ltw.examsystem.dto.response.UserResponse;
+import ltw.examsystem.entity.ERole;
+import ltw.examsystem.entity.Role;
 import ltw.examsystem.entity.User;
+import ltw.examsystem.repository.RoleRepository;
 import ltw.examsystem.repository.UserRepository;
 import ltw.examsystem.dto.response.SubmissionHistoryResponse;
-import ltw.examsystem.service.PDFReportService;
 import ltw.examsystem.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
-import java.io.IOException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -27,55 +28,85 @@ public class AdminUserController {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private SubmissionService submissionService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PDFReportService pdfReportService;
-
     /**
-     * Requirement b: Lấy danh sách tất cả người dùng (sinh viên)
+     * ĐÃ SỬA: Gộp GET All và Search vào chung 1 API
+     * Nếu có ?keyword=... thì tìm kiếm, nếu không có thì trả về tất cả
      */
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(convertToDtoList(users));
-    }
-
-    /**
-     * Requirement e: Tìm kiếm sinh viên theo tên hoặc email
-     */
-    @GetMapping("/search")
-    public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam String keyword) {
-        List<User> users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(keyword, keyword);
-        return ResponseEntity.ok(convertToDtoList(users));
-    }
-
-    /**
-     * Requirement b: Thêm mới một tài khoản sinh viên
-     */
-    @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = false) String keyword) {
+        List<User> users;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(keyword, keyword);
+        } else {
+            users = userRepository.findAll();
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return ResponseEntity.ok(convertToDtoList(users));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) {
+        // 1. Kiểm tra trùng lặp
+        if (userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.badRequest().body("Lỗi: Tên đăng nhập đã tồn tại!");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
+        }
+
+        // 2. Chuyển dữ liệu từ Request sang Entity
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (request.getStudentId() != null && !request.getStudentId().isEmpty()) {
+            user.setStudentId(request.getStudentId());
+        }
+
+        // 3. Xử lý phân quyền linh hoạt dựa trên tham số 'role' truyền lên
+        Role userRole;
+        String roleStr = request.getRole();
+
+        // Nếu Frontend truyền lên "ADMIN", gán quyền quản trị trị viên
+        if (roleStr != null && roleStr.equalsIgnoreCase("ADMIN")) {
+            userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền ADMIN trong DB."));
+        } else {
+            // Mặc định nếu không truyền hoặc truyền sai thì gán quyền sinh viên (USER)
+            userRole = roleRepository.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền USER trong DB."));
+        }
+
+        Set<Role> roles = new java.util.HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+
+        // 4. Lưu và trả về kết quả
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(convertToDto(savedUser));
     }
 
     /**
-     * Requirement b: Chỉnh sửa thông tin sinh viên
+     * ĐÃ SỬA: Đổi từ /update/{id} thành /{id}
      */
-    @PutMapping("/update/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest userRequest) {
         return userRepository.findById(id).map(user -> {
-            user.setUsername(userDetails.getUsername());
-            user.setEmail(userDetails.getEmail());
-            if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+            user.setUsername(userRequest.getUsername());
+            user.setEmail(userRequest.getEmail());
+            if (userRequest.getStudentId() != null) {
+                user.setStudentId(userRequest.getStudentId());
+            }
+            if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
             }
             User updatedUser = userRepository.save(user);
             return ResponseEntity.ok(convertToDto(updatedUser));
@@ -83,9 +114,9 @@ public class AdminUserController {
     }
 
     /**
-     * Requirement b: Xóa tài khoản sinh viên
+     * ĐÃ SỬA: Đổi từ /delete/{id} thành /{id}
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userRepository.findById(id).map(user -> {
             userRepository.delete(user);
@@ -94,37 +125,12 @@ public class AdminUserController {
     }
 
     /**
-     * Requirement e: Xem danh sách các kỳ thi mà một sinh viên cụ thể đã tham gia
+     * Lấy lịch sử thi CỦA MỘT USER (Hợp lý vì nó là tài nguyên con của User)
      */
     @GetMapping("/{userId}/results")
     public ResponseEntity<List<SubmissionHistoryResponse>> getStudentResults(@PathVariable Long userId) {
-        // Tái sử dụng logic lấy lịch sử đã viết ở phần Student
         List<SubmissionHistoryResponse> history = submissionService.getHistoryByUserId(userId);
         return ResponseEntity.ok(history);
-    }
-
-    /**
-     * Requirement e: Xem chi tiết bài làm cụ thể của sinh viên
-     */
-    @GetMapping("/submissions/{submissionId}")
-    public ResponseEntity<SubmissionDetailResponse> getDetailedSubmission(@PathVariable Long submissionId) {
-        // Admin có quyền xem bất kỳ submissionId nào
-        return ResponseEntity.ok(submissionService.getSubmissionDetail(submissionId));
-    }
-
-    /**
-     * Requirement e: Xuất phiếu điểm cá nhân dưới dạng PDF để in ấn
-     */
-    @GetMapping("/submissions/{submissionId}/export-pdf")
-    public ResponseEntity<byte[]> exportIndividualPdf(@PathVariable Long submissionId) throws IOException {
-        byte[] pdfBytes = pdfReportService.exportIndividualResultToPdf(submissionId);
-
-        return ResponseEntity.ok()
-
-
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=phieu_diem_sinh_vien.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
     }
 
     // --- Hàm bổ trợ để chuyển đổi Entity sang DTO ---
@@ -133,7 +139,7 @@ public class AdminUserController {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setStudentId(user.getStudentId()); // Giả định thực thể User có trường studentId
+        dto.setStudentId(user.getStudentId());
         return dto;
     }
 

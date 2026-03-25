@@ -91,7 +91,8 @@ public class AdminStatsController {
      */
     @GetMapping("/exam/{examId}")
     public ResponseEntity<ExamStatsResponse> getExamStats(@PathVariable Long examId) {
-        Exam exam = examRepository.findById(examId).orElseThrow();
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy kỳ thi với ID: " + examId));
         long totalStudents = userRepository.count();
         List<Submission> submissions = submissionRepository.findByExamId(examId);
 

@@ -7,4 +7,5 @@ import lombok.Setter;
 public class AnswerOptionResponse {
     private Long id;
     private String content;
+    private Boolean isCorrect;
 }

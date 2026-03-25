@@ -25,6 +25,10 @@ public class Submission {
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private SubmissionStatus status = SubmissionStatus.IN_PROGRESS;
+
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 

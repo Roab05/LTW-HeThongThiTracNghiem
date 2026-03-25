@@ -4,6 +4,7 @@ import ltw.examsystem.dto.response.AnswerOptionResponse;
 import ltw.examsystem.dto.response.ExamDetailResponse;
 import ltw.examsystem.dto.response.QuestionResponse;
 import ltw.examsystem.entity.Exam;
+import ltw.examsystem.entity.ExamStatus;
 import ltw.examsystem.repository.ExamRepository;
 import ltw.examsystem.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,29 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy đề thi với ID " + examId));
 
-        // 2. Map dữ liệu sang DTO để trả về cho Client
+        // 2. CHẶN BẢO MẬT: Kiểm tra xem đề thi đã được Admin gạt công tắc xuất bản chưa
+        if (!Boolean.TRUE.equals(exam.getIsPublished())) {
+            throw new RuntimeException("Truy cập bị từ chối! Kỳ thi này hiện chưa được mở hoặc đang bị ẩn.");
+        }
+
+        // 3. KIỂM TRA THỜI GIAN: Nếu là kỳ thi có giới hạn thời gian mở/đóng
+        if (exam.getStatus() == ExamStatus.TIME_RESTRICTED) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            if (exam.getStartTime() != null && now.isBefore(exam.getStartTime())) {
+                throw new RuntimeException("Chưa đến giờ làm bài!");
+            }
+            if (exam.getEndTime() != null && now.isAfter(exam.getEndTime())) {
+                throw new RuntimeException("Kỳ thi này đã kết thúc!");
+            }
+        }
+
+        // 4. Map dữ liệu sang DTO để trả về cho Client
         ExamDetailResponse response = new ExamDetailResponse();
         response.setId(exam.getId());
         response.setTitle(exam.getTitle());
         response.setDurationMinutes(exam.getDurationMinutes());
 
-        // 3. Map danh sách câu hỏi và loại bỏ cột isCorrect
+        // 5. Map danh sách câu hỏi và loại bỏ cột isCorrect
         response.setQuestions(exam.getQuestions().stream().map(question -> {
 
             QuestionResponse questionDto = new QuestionResponse();

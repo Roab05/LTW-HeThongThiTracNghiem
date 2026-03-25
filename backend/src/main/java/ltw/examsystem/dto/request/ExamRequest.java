@@ -10,5 +10,6 @@ public class ExamRequest {
     private String description;
     private Integer durationMinutes;
     private ExamStatus status; // FREE, TIME_RESTRICTED
-    private ExamType type;     // PRACTICE, MIDTERM, FINAL
+    private ExamType type;
+    private Boolean isPublished;// PRACTICE, MIDTERM, FINAL
 }

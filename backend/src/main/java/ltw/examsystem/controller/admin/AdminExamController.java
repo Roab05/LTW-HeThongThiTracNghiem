@@ -2,6 +2,9 @@ package ltw.examsystem.controller.admin;
 
 import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.request.QuestionRequest;
+import ltw.examsystem.dto.response.AnswerOptionResponse;
+import ltw.examsystem.dto.response.ExamSummaryResponse;
+import ltw.examsystem.dto.response.QuestionResponse;
 import ltw.examsystem.entity.AnswerOption;
 import ltw.examsystem.entity.Exam;
 import ltw.examsystem.entity.Question;
@@ -14,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -35,36 +40,30 @@ public class AdminExamController {
      * Requirement c: Lấy danh sách kỳ thi để Admin quản lý
      */
     @GetMapping
-    public ResponseEntity<List<Exam>> getAllExams() {
-        return ResponseEntity.ok(examRepository.findAll());
+    public ResponseEntity<List<ExamSummaryResponse>> getAllExams() {
+        List<Exam> exams = examRepository.findAll();
+        return ResponseEntity.ok(exams.stream().map(this::convertToSummaryDto).collect(Collectors.toList()));
     }
 
     /**
      * Requirement c: Tạo kỳ thi mới (thông tin cơ bản)
      */
     @PostMapping
-    public ResponseEntity<Exam> createExam(@RequestBody ExamRequest request) {
+    public ResponseEntity<ExamSummaryResponse> createExam(@RequestBody ExamRequest request) {
         Exam exam = new Exam();
-        exam.setTitle(request.getTitle());
-        exam.setDescription(request.getDescription());
-        exam.setDurationMinutes(request.getDurationMinutes());
-        exam.setStatus(request.getStatus());
-        exam.setType(request.getType());
-        return ResponseEntity.ok(examRepository.save(exam));
+        mapRequestToEntity(request, exam);
+        Exam saved = examRepository.save(exam);
+        return ResponseEntity.ok(convertToSummaryDto(saved));
     }
 
     /**
      * Requirement c: Chỉnh sửa thông tin kỳ thi
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Exam> updateExam(@PathVariable Long id, @RequestBody ExamRequest request) {
+    public ResponseEntity<ExamSummaryResponse> updateExam(@PathVariable Long id, @RequestBody ExamRequest request) {
         return examRepository.findById(id).map(exam -> {
-            exam.setTitle(request.getTitle());
-            exam.setDescription(request.getDescription());
-            exam.setDurationMinutes(request.getDurationMinutes());
-            exam.setStatus(request.getStatus());
-            exam.setType(request.getType());
-            return ResponseEntity.ok(examRepository.save(exam));
+            mapRequestToEntity(request, exam);
+            return ResponseEntity.ok(convertToSummaryDto(examRepository.save(exam)));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -93,9 +92,16 @@ public class AdminExamController {
                 opt.setQuestion(question);
                 return opt;
             }).collect(Collectors.toList());
-
             question.setOptions(options);
-            return ResponseEntity.ok(questionRepository.save(question));
+
+            Question savedQuestion = questionRepository.save(question);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", savedQuestion.getId());
+            response.put("content", savedQuestion.getContent());
+            response.put("message", "Thêm câu hỏi thành công!");
+
+            return ResponseEntity.ok(response);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -104,12 +110,10 @@ public class AdminExamController {
      */
     @PutMapping("/questions/{questionId}")
     @Transactional
-    public ResponseEntity<?> updateQuestion(@PathVariable Long questionId, @RequestBody QuestionRequest request) {
+    public ResponseEntity<QuestionResponse> updateQuestion(@PathVariable Long questionId, @RequestBody QuestionRequest request) {
         return questionRepository.findById(questionId).map(question -> {
             question.setContent(request.getContent());
             question.setExplanation(request.getExplanation());
-
-            // Xóa các option cũ và thay bằng list mới (Yêu cầu orphanRemoval = true trong Entity)
             question.getOptions().clear();
 
             request.getOptions().forEach(optReq -> {
@@ -120,7 +124,8 @@ public class AdminExamController {
                 question.getOptions().add(opt);
             });
 
-            return ResponseEntity.ok(questionRepository.save(question));
+            Question saved = questionRepository.save(question);
+            return ResponseEntity.ok(convertToQuestionDto(saved));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -148,5 +153,44 @@ public class AdminExamController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi khi nhập file: " + e.getMessage());
         }
+    }
+
+    private ExamSummaryResponse convertToSummaryDto(Exam exam) {
+        ExamSummaryResponse dto = new ExamSummaryResponse();
+        dto.setId(exam.getId());
+        dto.setTitle(exam.getTitle());
+        dto.setDescription(exam.getDescription());
+        dto.setType(exam.getType());
+        dto.setStatus(exam.getStatus());
+        dto.setDurationMinutes(exam.getDurationMinutes());
+        dto.setIsPublished(exam.getIsPublished()); // Đừng quên field này nhé
+        return dto;
+    }
+
+    private QuestionResponse convertToQuestionDto(Question q) {
+        QuestionResponse dto = new QuestionResponse();
+        dto.setId(q.getId());
+        dto.setContent(q.getContent());
+
+        // Cần map thêm list options để không bị null
+        if (q.getOptions() != null) {
+            dto.setOptions(q.getOptions().stream().map(opt -> {
+                AnswerOptionResponse optDto = new AnswerOptionResponse();
+                optDto.setId(opt.getId());
+                optDto.setContent(opt.getContent());
+                optDto.setIsCorrect(opt.getIsCorrect());
+                return optDto;
+            }).collect(Collectors.toList()));
+        }
+        return dto;
+    }
+
+    private void mapRequestToEntity(ExamRequest request, Exam exam) {
+        exam.setTitle(request.getTitle());
+        exam.setDescription(request.getDescription());
+        exam.setDurationMinutes(request.getDurationMinutes());
+        exam.setStatus(request.getStatus());
+        exam.setType(request.getType());
+        if (request.getIsPublished() != null) exam.setIsPublished(request.getIsPublished());
     }
 }

@@ -1,16 +1,16 @@
-//package ltw.examsystem.security.jwt;
+//package ltw.examsystem.security_backup.jwt;
 //
-//import ltw.examsystem.security.services.UserDetailsImpl;
+//import ltw.examsystem.security_backup.services.UserDetailsImpl;
 //import io.jsonwebtoken.*;
 //import io.jsonwebtoken.io.Decoders;
-//import io.jsonwebtoken.security.Keys;
+//import io.jsonwebtoken.security_backup.Keys;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.security.core.Authentication;
+//import org.springframework.security_backup.core.Authentication;
 //import org.springframework.stereotype.Component;
 //
-//import java.security.Key;
+//import java.security_backup.Key;
 //import java.util.Date;
 //
 //@Component

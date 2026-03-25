@@ -34,10 +34,8 @@ public class StudentExamController {
             @RequestParam(required = false) ExamStatus status,
             @RequestParam(required = false) ExamType type) {
 
-        // 1. Lấy dữ liệu từ Repo (có lọc)
-        List<Exam> exams = examRepository.findByFilters(title, status, type);
+        List<Exam> exams = examRepository.findExamsForStudent(title, status, type);
 
-        // 2. Chuyển đổi sang DTO rút gọn
         List<ExamSummaryResponse> summaryList = exams.stream().map(exam -> {
             ExamSummaryResponse dto = new ExamSummaryResponse();
             dto.setId(exam.getId());

@@ -1,11 +1,11 @@
-//package ltw.examsystem.security.services;
+//package ltw.examsystem.security_backup.services;
 //
 //import ltw.examsystem.entity.User;
 //import ltw.examsystem.repository.UserRepository;
 //import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.core.userdetails.UsernameNotFoundException;
+//import org.springframework.security_backup.core.userdetails.UserDetails;
+//import org.springframework.security_backup.core.userdetails.UserDetailsService;
+//import org.springframework.security_backup.core.userdetails.UsernameNotFoundException;
 //import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
 //

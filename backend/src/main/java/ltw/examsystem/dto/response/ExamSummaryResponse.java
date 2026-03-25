@@ -12,5 +12,6 @@ public class ExamSummaryResponse {
     private String description;
     private ExamType type;
     private ExamStatus status;
+    private Boolean isPublished;
     private Integer durationMinutes;
 }

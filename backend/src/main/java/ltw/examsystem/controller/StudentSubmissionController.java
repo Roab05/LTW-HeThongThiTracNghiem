@@ -6,6 +6,7 @@ import ltw.examsystem.dto.response.SubmissionDetailResponse;
 import ltw.examsystem.dto.response.SubmissionHistoryResponse;
 import ltw.examsystem.dto.response.SubmissionResultResponse;
 import ltw.examsystem.dto.response.TimeLeftResponse;
+import ltw.examsystem.security.SecurityUtils;
 import ltw.examsystem.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,39 +22,49 @@ public class StudentSubmissionController {
     @Autowired
     private SubmissionService submissionService;
 
+    @Autowired
+    private SecurityUtils securityUtils;
+
     @PostMapping
     public ResponseEntity<Long> startExam(@RequestBody StartExamRequest request) {
-        // Trả về ID của lần nộp bài mới được tạo
-        return ResponseEntity.ok(submissionService.startExam(request));
+        Long currentUserId = securityUtils.getCurrentUserId();
+        return ResponseEntity.ok(submissionService.startExam(currentUserId, request));
     }
 
     /**
-     * API 1: Nộp bài thi và nhận điểm ngay lập tức
+     * ĐÃ SỬA: Thêm {submissionId} vào URL để biết chính xác đang nộp cho bài nào
      */
-    @PostMapping("/submit")
-    public ResponseEntity<SubmissionResultResponse> submitExam(@RequestBody SubmitExamRequest request) {
-        SubmissionResultResponse result = submissionService.submitExam(request);
+    @PostMapping("/{submissionId}/submit")
+    public ResponseEntity<SubmissionResultResponse> submitExam(
+            @PathVariable Long submissionId,
+            @RequestBody SubmitExamRequest request) {
+
+        // 1. Lấy ID của người đang request
+        Long currentUserId = securityUtils.getCurrentUserId();
+
+        // 2. Truyền cả currentUserId và submissionId xuống Service
+        SubmissionResultResponse result = submissionService.submitExam(currentUserId, submissionId, request);
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * API 2: Lấy lịch sử các bài thi
-     */
-    @GetMapping("/history/{userId}")
-    public ResponseEntity<List<SubmissionHistoryResponse>> getSubmissionHistory(@PathVariable Long userId) {
-        return ResponseEntity.ok(submissionService.getHistoryByUserId(userId));
+    @GetMapping("/my-history")
+    public ResponseEntity<List<SubmissionHistoryResponse>> getSubmissionHistory() {
+        Long currentUserId = securityUtils.getCurrentUserId();
+        return ResponseEntity.ok(submissionService.getHistoryByUserId(currentUserId));
     }
 
-    /**
-     * API 3: Xem chi tiết một bài đã nộp
-     */
     @GetMapping("/{submissionId}")
     public ResponseEntity<SubmissionDetailResponse> getSubmissionDetail(@PathVariable Long submissionId) {
-        return ResponseEntity.ok(submissionService.getSubmissionDetail(submissionId));
+        Long currentUserId = securityUtils.getCurrentUserId();
+        // Cần sửa Service để nhận thêm userId và check:
+        // if (!submission.getUser().getId().equals(currentUserId)) throw Exception("Forbidden");
+        return ResponseEntity.ok(submissionService.getSubmissionDetail(currentUserId, submissionId));
     }
 
     @GetMapping("/{submissionId}/time-left")
     public ResponseEntity<TimeLeftResponse> getTimeLeft(@PathVariable Long submissionId) {
-        return ResponseEntity.ok(submissionService.getTimeLeft(submissionId));
+        Long currentUserId = securityUtils.getCurrentUserId();
+        // Tương tự, tránh việc sinh viên A xem trộm thời gian của sinh viên B
+        return ResponseEntity.ok(submissionService.getTimeLeft(currentUserId, submissionId));
     }
 }

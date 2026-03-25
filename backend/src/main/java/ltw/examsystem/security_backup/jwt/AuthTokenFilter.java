@@ -1,6 +1,6 @@
-//package ltw.examsystem.security.jwt;
+//package ltw.examsystem.security_backup.jwt;
 //
-//import ltw.examsystem.security.services.UserDetailsServiceImpl;
+//import ltw.examsystem.security_backup.services.UserDetailsServiceImpl;
 //import jakarta.servlet.FilterChain;
 //import jakarta.servlet.ServletException;
 //import jakarta.servlet.http.HttpServletRequest;
@@ -8,10 +8,10 @@
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.core.context.SecurityContextHolder;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+//import org.springframework.security_backup.authentication.UsernamePasswordAuthenticationToken;
+//import org.springframework.security_backup.core.context.SecurityContextHolder;
+//import org.springframework.security_backup.core.userdetails.UserDetails;
+//import org.springframework.security_backup.web.authentication.WebAuthenticationDetailsSource;
 //import org.springframework.util.StringUtils;
 //import org.springframework.web.filter.OncePerRequestFilter;
 //
