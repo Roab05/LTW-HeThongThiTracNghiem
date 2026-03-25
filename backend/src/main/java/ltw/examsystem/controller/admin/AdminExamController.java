@@ -76,6 +76,22 @@ public class AdminExamController {
         return ResponseEntity.ok("Đã xóa kỳ thi thành công");
     }
 
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<ExamSummaryResponse> togglePublish(
+            @PathVariable Long id,
+            @RequestParam boolean publish) {
+
+        return examRepository.findById(id).map(exam -> {
+            exam.setIsPublished(publish);
+            Exam saved = examRepository.save(exam);
+
+            String status = publish ? "MỞ" : "ĐÓNG";
+            System.out.println("✅ Đề thi ID " + id + " đã được " + status);
+
+            return ResponseEntity.ok(convertToSummaryDto(saved));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/{examId}/questions")
     @Transactional
     public ResponseEntity<?> addQuestion(@PathVariable Long examId, @RequestBody QuestionRequest request) {
@@ -96,12 +112,7 @@ public class AdminExamController {
 
             Question savedQuestion = questionRepository.save(question);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", savedQuestion.getId());
-            response.put("content", savedQuestion.getContent());
-            response.put("message", "Thêm câu hỏi thành công!");
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(convertToQuestionDto(savedQuestion));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -171,6 +182,7 @@ public class AdminExamController {
         QuestionResponse dto = new QuestionResponse();
         dto.setId(q.getId());
         dto.setContent(q.getContent());
+        dto.setExplanation(q.getExplanation());
 
         // Cần map thêm list options để không bị null
         if (q.getOptions() != null) {

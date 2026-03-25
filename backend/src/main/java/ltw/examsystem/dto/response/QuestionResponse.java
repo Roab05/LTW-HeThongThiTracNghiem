@@ -9,4 +9,5 @@ public class QuestionResponse {
     private Long id;
     private String content;
     private List<AnswerOptionResponse> options;
+    private String explanation;
 }
