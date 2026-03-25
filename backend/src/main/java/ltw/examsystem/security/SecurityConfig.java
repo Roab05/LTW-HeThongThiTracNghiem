@@ -57,9 +57,9 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
+                        // 1. Cho phép /error để hiện đúng mã lỗi 400, 404, 500 thay vì bị 401 giả
+                        auth.requestMatchers("/api/auth/**", "/error").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                // Cho phép USER hoặc ADMIN đều có thể gọi API của sinh viên
                                 .requestMatchers("/api/student/**").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().authenticated()
                 );

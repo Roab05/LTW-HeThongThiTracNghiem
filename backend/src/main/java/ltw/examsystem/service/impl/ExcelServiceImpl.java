@@ -106,7 +106,11 @@ public class ExcelServiceImpl implements ExcelService {
                 row.createCell(0).setCellValue(rowIdx - 1);
                 row.createCell(1).setCellValue(s.getUser().getUsername());
                 row.createCell(2).setCellValue(s.getExam().getTitle());
-                row.createCell(3).setCellValue(s.getScore());
+                if (s.getScore() != null) {
+                    row.createCell(3).setCellValue(s.getScore());
+                } else {
+                    row.createCell(3).setCellValue(0.0); // Hoặc để trống: row.createCell(3).setCellValue("");
+                }
                 row.createCell(4).setCellValue(s.getCorrectAnswers() + "/" + s.getTotalQuestions());
                 row.createCell(5).setCellValue(s.getSubmitTime().toString());
             }

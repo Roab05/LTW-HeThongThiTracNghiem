@@ -1,8 +1,6 @@
 package ltw.examsystem.service.impl;
 
-import ltw.examsystem.dto.response.AnswerOptionResponse;
-import ltw.examsystem.dto.response.ExamDetailResponse;
-import ltw.examsystem.dto.response.QuestionResponse;
+import ltw.examsystem.dto.response.*;
 import ltw.examsystem.entity.Exam;
 import ltw.examsystem.entity.ExamStatus;
 import ltw.examsystem.repository.ExamRepository;
@@ -45,17 +43,18 @@ public class ExamServiceImpl implements ExamService {
         response.setId(exam.getId());
         response.setTitle(exam.getTitle());
         response.setDurationMinutes(exam.getDurationMinutes());
+        response.setDescription(exam.getDescription()); // Bổ sung cho SV xem mô tả
 
         // 5. Map danh sách câu hỏi và loại bỏ cột isCorrect
         response.setQuestions(exam.getQuestions().stream().map(question -> {
 
-            QuestionResponse questionDto = new QuestionResponse();
+            StudentQuestionResponse questionDto = new StudentQuestionResponse();
             questionDto.setId(question.getId());
             questionDto.setContent(question.getContent());
 
             // Lấy các đáp án A, B, C, D của câu hỏi này
             questionDto.setOptions(question.getOptions().stream().map(option -> {
-                AnswerOptionResponse optionDto = new AnswerOptionResponse();
+                StudentAnswerOptionResponse optionDto = new StudentAnswerOptionResponse();
                 optionDto.setId(option.getId());
                 optionDto.setContent(option.getContent());
                 // Cố tình KHÔNG set isCorrect ở đây để sinh viên không xem trộm được
@@ -64,6 +63,43 @@ public class ExamServiceImpl implements ExamService {
 
             return questionDto;
 
+        }).collect(Collectors.toList()));
+
+        return response;
+    }
+
+    @Override
+    public ExamDetailResponse getExamDetailsForAdmin(Long examId) {
+        // 1. Tìm kỳ thi
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy kỳ thi với ID: " + examId));
+
+        // 2. Khởi tạo DTO và nạp các trường thông tin cơ bản
+        ExamDetailResponse response = new ExamDetailResponse();
+        response.setId(exam.getId());
+        response.setTitle(exam.getTitle());
+        response.setDescription(exam.getDescription());
+        response.setDurationMinutes(exam.getDurationMinutes());
+        response.setStatus(exam.getStatus().toString());
+        response.setType(exam.getType().toString());
+        response.setIsPublished(exam.getIsPublished());
+
+        // 3. Map danh sách câu hỏi (Full thông tin cho Admin)
+        response.setQuestions(exam.getQuestions().stream().map(q -> {
+            QuestionResponse qDto = new QuestionResponse();
+            qDto.setId(q.getId());
+            qDto.setContent(q.getContent());
+            qDto.setExplanation(q.getExplanation()); // Hiện giải thích
+
+            qDto.setOptions(q.getOptions().stream().map(opt -> {
+                AnswerOptionResponse optDto = new AnswerOptionResponse();
+                optDto.setId(opt.getId());
+                optDto.setContent(opt.getContent());
+                optDto.setIsCorrect(opt.getIsCorrect()); // Hiện đáp án đúng
+                return optDto;
+            }).collect(Collectors.toList()));
+
+            return qDto;
         }).collect(Collectors.toList()));
 
         return response;

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -93,28 +94,40 @@ public class AdminStatsController {
     public ResponseEntity<ExamStatsResponse> getExamStats(@PathVariable Long examId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kỳ thi với ID: " + examId));
+
         long totalStudents = userRepository.count();
-        List<Submission> submissions = submissionRepository.findByExamId(examId);
+
+        // ĐÃ SỬA: Lọc bỏ những bài chưa có điểm (null) ngay tại đây
+        List<Submission> validSubmissions = submissionRepository.findByExamId(examId).stream()
+                .filter(s -> s.getScore() != null)
+                .collect(Collectors.toList());
 
         ExamStatsResponse stats = new ExamStatsResponse();
         stats.setExamId(examId);
         stats.setExamTitle(exam.getTitle());
-        stats.setParticipantsCount(submissions.size());
+        stats.setParticipantsCount(validSubmissions.size());
 
-        if (!submissions.isEmpty()) {
-            double avg = submissions.stream().mapToDouble(Submission::getScore).average().orElse(0.0);
+        if (!validSubmissions.isEmpty()) {
+            // Tính điểm trung bình (An toàn vì đã lọc null ở trên)
+            double avg = validSubmissions.stream()
+                    .mapToDouble(Submission::getScore)
+                    .average()
+                    .orElse(0.0);
             stats.setAverageScore(Math.round(avg * 100.0) / 100.0);
 
-            double completionRate = (double) submissions.size() / totalStudents * 100;
-            stats.setCompletionRate(Math.round(completionRate * 100.0) / 100.0);
+            // Tính tỷ lệ hoàn thành
+            if (totalStudents > 0) {
+                double rate = (double) validSubmissions.size() / totalStudents * 100;
+                stats.setCompletionRate(Math.round(rate * 100.0) / 100.0);
+            }
 
+            // Tính biểu đồ (An toàn vì đã lọc null ở trên)
             Map<String, Long> distribution = new HashMap<>();
-            distribution.put("Yếu (0-5)", submissions.stream().filter(s -> s.getScore() < 5).count());
-            distribution.put("Khá (5-8)", submissions.stream().filter(s -> s.getScore() >= 5 && s.getScore() < 8).count());
-            distribution.put("Giỏi (8-10)", submissions.stream().filter(s -> s.getScore() >= 8).count());
+            distribution.put("Yêu (0-5)", validSubmissions.stream().filter(s -> s.getScore() < 5).count());
+            distribution.put("Khá (5-8)", validSubmissions.stream().filter(s -> s.getScore() >= 5 && s.getScore() < 8).count());
+            distribution.put("Giỏi (8-10)", validSubmissions.stream().filter(s -> s.getScore() >= 8).count());
             stats.setScoreDistribution(distribution);
         }
-
         return ResponseEntity.ok(stats);
     }
 
@@ -130,10 +143,15 @@ public class AdminStatsController {
         List<Submission> results = submissionRepository.filterSubmissions(
                 examId, startDate, endDate, minScore, maxScore);
 
-        // 2. Chuyển đổi thành file Excel
-        byte[] excelContent = excelService.exportSubmissionsToExcel(results);
+        // BỔ SUNG: Lọc bỏ những bài nộp có điểm bị null
+        List<Submission> validResults = results.stream()
+                .filter(s -> s.getScore() != null)
+                .collect(Collectors.toList());
 
-        // 3. Trả về dưới dạng file download
+        // 2. Chuyển đổi thành file Excel (Dùng list đã lọc)
+        byte[] excelContent = excelService.exportSubmissionsToExcel(validResults);
+
+        // 3. Trả về file download
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao_cao_ket_qua.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -148,15 +166,27 @@ public class AdminStatsController {
             @RequestParam(required = false) Double minScore,
             @RequestParam(required = false) Double maxScore) throws IOException {
 
-        List<Submission> results = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore);
+        // 1. Lấy dữ liệu thô từ Repository
+        List<Submission> allResults = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore);
 
+        // 2. ĐÃ SỬA: Lọc bỏ những bài nộp có điểm bị null (chưa hoàn thành)
+        List<Submission> validResults = allResults.stream()
+                .filter(s -> s.getScore() != null)
+                .collect(Collectors.toList());
+
+        // 3. Tính toán các thông số tóm tắt (Summary Data) trên dữ liệu sạch
         Map<String, Object> summary = new HashMap<>();
-        summary.put("total", results.size());
-        double avg = results.stream().mapToDouble(Submission::getScore).average().orElse(0.0);
+        summary.put("total", validResults.size());
+
+        // ĐÃ SỬA: Tính trung bình an toàn
+        double avg = validResults.stream()
+                .mapToDouble(Submission::getScore)
+                .average()
+                .orElse(0.0);
         summary.put("average", Math.round(avg * 100.0) / 100.0);
 
-        // Gọi đúng tên service mới
-        byte[] pdfBytes = pdfReportService.exportStatsToPdf(results, summary);
+        // 4. Gọi Service xuất PDF với dữ liệu đã được làm sạch
+        byte[] pdfBytes = pdfReportService.exportStatsToPdf(validResults, summary);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao_cao_ket_qua.pdf")

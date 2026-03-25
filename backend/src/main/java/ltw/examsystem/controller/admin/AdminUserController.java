@@ -12,6 +12,7 @@ import ltw.examsystem.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -98,19 +99,53 @@ public class AdminUserController {
      * ĐÃ SỬA: Đổi từ /update/{id} thành /{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest userRequest) {
+    @Transactional // Đảm bảo tính toàn vẹn dữ liệu
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest userRequest) {
         return userRepository.findById(id).map(user -> {
+
+            // 1. Kiểm tra trùng Username (trừ chính nó)
+            if (!user.getUsername().equals(userRequest.getUsername()) &&
+                    userRepository.existsByUsername(userRequest.getUsername())) {
+                return ResponseEntity.badRequest().body("Lỗi: Tên đăng nhập đã tồn tại!");
+            }
+
+            // 2. Kiểm tra trùng Email (trừ chính nó)
+            if (!user.getEmail().equals(userRequest.getEmail()) &&
+                    userRepository.existsByEmail(userRequest.getEmail())) {
+                return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
+            }
+
+            // 3. Cập nhật các thông tin cơ bản
             user.setUsername(userRequest.getUsername());
             user.setEmail(userRequest.getEmail());
+
             if (userRequest.getStudentId() != null) {
                 user.setStudentId(userRequest.getStudentId());
             }
+
             if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
             }
-            User updatedUser = userRepository.save(user);
-            return ResponseEntity.ok(convertToDto(updatedUser));
-        }).orElse(ResponseEntity.notFound().build());
+
+            // 4. BỔ SUNG: Cập nhật Role nếu có truyền lên
+            if (userRequest.getRole() != null) {
+                String roleStr = userRequest.getRole();
+                Role userRole = roleRepository.findByName(
+                        roleStr.equalsIgnoreCase("ADMIN") ? ERole.ROLE_ADMIN : ERole.ROLE_USER
+                ).orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền."));
+
+                Set<Role> roles = new HashSet<>();
+                roles.add(userRole);
+                user.setRoles(roles);
+            }
+
+            userRepository.save(user);
+            return ResponseEntity.ok(convertToDto(user));
+
+        }).orElseGet(() -> {
+            // Trả về lỗi rõ ràng để tránh Spring Security redirect sang /error gây lỗi 401
+            return ResponseEntity.status(404).body("Lỗi: Không tìm thấy người dùng với ID " + id);
+        });
     }
 
     /**

@@ -235,6 +235,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 AnswerOptionResponse optDto = new AnswerOptionResponse();
                 optDto.setId(opt.getId());
                 optDto.setContent(opt.getContent());
+                optDto.setIsCorrect(opt.getIsCorrect());
                 return optDto;
             }).collect(Collectors.toList()));
 

@@ -1,8 +1,10 @@
 package ltw.examsystem.controller.admin;
 
+import ltw.examsystem.dto.request.AnswerOptionRequest;
 import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.request.QuestionRequest;
 import ltw.examsystem.dto.response.AnswerOptionResponse;
+import ltw.examsystem.dto.response.ExamDetailResponse;
 import ltw.examsystem.dto.response.ExamSummaryResponse;
 import ltw.examsystem.dto.response.QuestionResponse;
 import ltw.examsystem.entity.AnswerOption;
@@ -10,6 +12,7 @@ import ltw.examsystem.entity.Exam;
 import ltw.examsystem.entity.Question;
 import ltw.examsystem.repository.ExamRepository;
 import ltw.examsystem.repository.QuestionRepository;
+import ltw.examsystem.service.ExamService;
 import ltw.examsystem.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,9 @@ import java.util.stream.Collectors;
 public class AdminExamController {
 
     @Autowired
+    private ExamService examService;
+
+    @Autowired
     private ExamRepository examRepository;
 
     @Autowired
@@ -43,6 +49,12 @@ public class AdminExamController {
     public ResponseEntity<List<ExamSummaryResponse>> getAllExams() {
         List<Exam> exams = examRepository.findAll();
         return ResponseEntity.ok(exams.stream().map(this::convertToSummaryDto).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ExamDetailResponse> getExamDetail(@PathVariable Long id) {
+        // Chỉ việc gọi Service và trả về kết quả
+        return ResponseEntity.ok(examService.getExamDetailsForAdmin(id));
     }
 
     /**
@@ -125,15 +137,36 @@ public class AdminExamController {
         return questionRepository.findById(questionId).map(question -> {
             question.setContent(request.getContent());
             question.setExplanation(request.getExplanation());
-            question.getOptions().clear();
 
-            request.getOptions().forEach(optReq -> {
-                AnswerOption opt = new AnswerOption();
-                opt.setContent(optReq.getContent());
-                opt.setIsCorrect(optReq.getIsCorrect());
-                opt.setQuestion(question);
-                question.getOptions().add(opt);
-            });
+            List<AnswerOption> dbOptions = question.getOptions();
+            List<AnswerOptionRequest> reqOptions = request.getOptions();
+
+            // Duyệt qua danh sách đáp án gửi lên
+            for (int i = 0; i < reqOptions.size(); i++) {
+                AnswerOptionRequest optReq = reqOptions.get(i);
+
+                if (i < dbOptions.size()) {
+                    // VỊ TRÍ NÀY ĐÃ CÓ TRONG DB -> CẬP NHẬT (GIỮ NGUYÊN ID)
+                    AnswerOption existingOpt = dbOptions.get(i);
+                    existingOpt.setContent(optReq.getContent());
+                    existingOpt.setIsCorrect(optReq.getIsCorrect());
+                } else {
+                    // VỊ TRÍ NÀY CHƯA CÓ (Vd: DB có 4 mà Request gửi 5) -> THÊM MỚI
+                    AnswerOption newOpt = new AnswerOption();
+                    newOpt.setContent(optReq.getContent());
+                    newOpt.setIsCorrect(optReq.getIsCorrect());
+                    newOpt.setQuestion(question);
+                    dbOptions.add(newOpt);
+                }
+            }
+
+            // Nếu Request gửi ít hơn DB (Vd: DB có 4 mà Request chỉ gửi 2) -> XÓA BỚT
+            if (dbOptions.size() > reqOptions.size()) {
+                int currentSize = dbOptions.size();
+                for (int i = currentSize - 1; i >= reqOptions.size(); i--) {
+                    dbOptions.remove(i);
+                }
+            }
 
             Question saved = questionRepository.save(question);
             return ResponseEntity.ok(convertToQuestionDto(saved));
