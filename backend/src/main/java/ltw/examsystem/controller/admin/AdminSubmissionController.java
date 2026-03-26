@@ -61,7 +61,6 @@ public class AdminSubmissionController {
             dto.setStatus(s.getStatus().toString());
             dto.setFullName(s.getUser().getFullName());
             dto.setStudentId(s.getUser().getStudentId());
-            dto.setStudentId(s.getUser().getStudentId());
             return dto;
         }).collect(Collectors.toList());
 

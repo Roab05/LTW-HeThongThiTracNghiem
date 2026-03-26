@@ -45,6 +45,8 @@ public class StudentExamController {
             dto.setStatus(exam.getStatus());
             dto.setDurationMinutes(exam.getDurationMinutes());
             dto.setIsPublished(exam.getIsPublished());
+            dto.setStartTime(exam.getStartTime());
+            dto.setEndTime(exam.getEndTime());
             return dto;
         }).collect(Collectors.toList());
 

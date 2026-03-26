@@ -207,7 +207,10 @@ public class AdminExamController {
         dto.setType(exam.getType());
         dto.setStatus(exam.getStatus());
         dto.setDurationMinutes(exam.getDurationMinutes());
-        dto.setIsPublished(exam.getIsPublished()); // Đừng quên field này nhé
+        dto.setIsPublished(exam.getIsPublished());
+
+        dto.setStartTime(exam.getStartTime());
+        dto.setEndTime(exam.getEndTime());// Đừng quên field này nhé
         return dto;
     }
 
@@ -230,6 +233,7 @@ public class AdminExamController {
         return dto;
     }
 
+    // Thay thế hàm mapRequestToEntity cũ trong AdminExamController.java
     private void mapRequestToEntity(ExamRequest request, Exam exam) {
         exam.setTitle(request.getTitle());
         exam.setDescription(request.getDescription());
@@ -237,5 +241,21 @@ public class AdminExamController {
         exam.setStatus(request.getStatus());
         exam.setType(request.getType());
         if (request.getIsPublished() != null) exam.setIsPublished(request.getIsPublished());
+
+        // BỔ SUNG: Xử lý thời gian cho kỳ thi có giới hạn
+        if (ltw.examsystem.entity.ExamStatus.TIME_RESTRICTED.equals(request.getStatus())) {
+            if (request.getStartTime() == null || request.getEndTime() == null) {
+                throw new IllegalArgumentException("Kỳ thi có giới hạn thời gian bắt buộc phải có thời gian bắt đầu và kết thúc.");
+            }
+            if (request.getStartTime().isAfter(request.getEndTime())) {
+                throw new IllegalArgumentException("Thời gian bắt đầu không được lớn hơn thời gian kết thúc.");
+            }
+            exam.setStartTime(request.getStartTime());
+            exam.setEndTime(request.getEndTime());
+        } else {
+            // Nếu chuyển từ TIME_RESTRICTED sang trạng thái khác (như OPEN), cần xóa thời gian cũ
+            exam.setStartTime(null);
+            exam.setEndTime(null);
+        }
     }
 }

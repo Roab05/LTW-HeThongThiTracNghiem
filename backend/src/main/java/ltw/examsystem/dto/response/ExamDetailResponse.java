@@ -3,6 +3,8 @@ package ltw.examsystem.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter
@@ -13,7 +15,9 @@ public class ExamDetailResponse {
     private String description;     // Mới bổ sung
     private String type;            // Mới bổ sung
     private String status;          // Mới bổ sung
-    private Boolean isPublished;    // Mới bổ sung
+    private Boolean isPublished;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;// Mới bổ sung
     private Integer durationMinutes;
 
     // Danh sách câu hỏi (Dùng chung cho cả Admin/User nhưng khác kiểu dữ liệu bên trong)

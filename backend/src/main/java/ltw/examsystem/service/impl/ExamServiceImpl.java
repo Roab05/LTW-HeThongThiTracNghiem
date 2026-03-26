@@ -43,7 +43,9 @@ public class ExamServiceImpl implements ExamService {
         response.setId(exam.getId());
         response.setTitle(exam.getTitle());
         response.setDurationMinutes(exam.getDurationMinutes());
-        response.setDescription(exam.getDescription()); // Bổ sung cho SV xem mô tả
+        response.setDescription(exam.getDescription());
+        response.setStartTime(exam.getStartTime());
+        response.setEndTime(exam.getEndTime());// Bổ sung cho SV xem mô tả
 
         // 5. Map danh sách câu hỏi và loại bỏ cột isCorrect
         response.setQuestions(exam.getQuestions().stream().map(question -> {
@@ -83,6 +85,8 @@ public class ExamServiceImpl implements ExamService {
         response.setStatus(exam.getStatus().toString());
         response.setType(exam.getType().toString());
         response.setIsPublished(exam.getIsPublished());
+        response.setStartTime(exam.getStartTime());
+        response.setEndTime(exam.getEndTime());
 
         // 3. Map danh sách câu hỏi (Full thông tin cho Admin)
         response.setQuestions(exam.getQuestions().stream().map(q -> {
