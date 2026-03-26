@@ -1,13 +1,17 @@
 package ltw.examsystem.service.impl;
 
+import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.response.*;
 import ltw.examsystem.entity.Exam;
 import ltw.examsystem.entity.ExamStatus;
+import ltw.examsystem.entity.ExamType;
 import ltw.examsystem.repository.ExamRepository;
 import ltw.examsystem.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,5 +111,106 @@ public class ExamServiceImpl implements ExamService {
         }).collect(Collectors.toList()));
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public ExamSummaryResponse createExam(ExamRequest request) {
+        Exam exam = new Exam();
+        mapRequestToEntity(request, exam);
+        Exam saved = examRepository.save(exam);
+        return convertToSummaryDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public ExamSummaryResponse updateExam(Long id, ExamRequest request) {
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kỳ thi với ID: " + id));
+
+        mapRequestToEntity(request, exam);
+        Exam saved = examRepository.save(exam);
+        return convertToSummaryDto(saved);
+    }
+
+    @Override
+    public void deleteExam(Long id) {
+        if (!examRepository.existsById(id)) {
+            throw new IllegalArgumentException("Không tìm thấy kỳ thi với ID: " + id);
+        }
+        examRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public ExamSummaryResponse togglePublish(Long id, boolean publish) {
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kỳ thi với ID: " + id));
+
+        exam.setIsPublished(publish);
+        Exam saved = examRepository.save(exam);
+
+        String status = publish ? "MỞ" : "ĐÓNG";
+        System.out.println("✅ Đề thi ID " + id + " đã được " + status);
+
+        return convertToSummaryDto(saved);
+    }
+
+    @Override
+    public List<ExamSummaryResponse> getAllExams() {
+        // Lấy toàn bộ Entity từ DB
+        List<Exam> exams = examRepository.findAll();
+
+        // Dùng stream() để chuyển đổi (map) từng Entity sang DTO
+        return exams.stream()
+                .map(this::convertToSummaryDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ExamSummaryResponse> getExamsForStudent(String title, ExamStatus status, ExamType type) {
+        List<Exam> exams = examRepository.findExamsForStudent(title, status, type);
+        return exams.stream()
+                .map(this::convertToSummaryDto) // Dùng lại hàm convertToSummaryDto bạn đã có sẵn ở Service
+                .collect(Collectors.toList());
+    }
+
+    // 🚀 COPY HÀM NÀY TỪ CONTROLLER SANG VÀ SỬA THÀNH PRIVATE DÙNG NỘI BỘ
+    private void mapRequestToEntity(ExamRequest request, Exam exam) {
+        exam.setTitle(request.getTitle());
+        exam.setDescription(request.getDescription());
+        exam.setDurationMinutes(request.getDurationMinutes());
+        exam.setStatus(request.getStatus());
+        exam.setType(request.getType());
+        if (request.getIsPublished() != null) exam.setIsPublished(request.getIsPublished());
+
+        if (ltw.examsystem.entity.ExamStatus.TIME_RESTRICTED.equals(request.getStatus())) {
+            if (request.getStartTime() == null || request.getEndTime() == null) {
+                throw new IllegalArgumentException("Kỳ thi có giới hạn thời gian bắt buộc phải có thời gian bắt đầu và kết thúc.");
+            }
+            if (request.getStartTime().isAfter(request.getEndTime())) {
+                throw new IllegalArgumentException("Thời gian bắt đầu không được lớn hơn thời gian kết thúc.");
+            }
+            exam.setStartTime(request.getStartTime());
+            exam.setEndTime(request.getEndTime());
+        } else {
+            exam.setStartTime(null);
+            exam.setEndTime(null);
+        }
+    }
+
+    // 🚀 ĐƯA LUÔN HÀM CONVERT DTO XUỐNG ĐÂY ĐỂ ĐỒNG BỘ
+    private ExamSummaryResponse convertToSummaryDto(Exam exam) {
+        ExamSummaryResponse dto = new ExamSummaryResponse();
+        dto.setId(exam.getId());
+        dto.setTitle(exam.getTitle());
+        dto.setDescription(exam.getDescription());
+        dto.setType(exam.getType());
+        dto.setStatus(exam.getStatus());
+        dto.setDurationMinutes(exam.getDurationMinutes());
+        dto.setIsPublished(exam.getIsPublished());
+        dto.setStartTime(exam.getStartTime());
+        dto.setEndTime(exam.getEndTime());
+        return dto;
     }
 }

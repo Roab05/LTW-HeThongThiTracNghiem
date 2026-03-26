@@ -165,6 +165,31 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    public List<SubmissionHistoryResponse> filterSubmissions(Long examId, LocalDateTime startDate, LocalDateTime endDate, Double minScore, Double maxScore) {
+        // 1. Lấy dữ liệu từ Repository
+        List<Submission> results = submissionRepository.filterSubmissions(
+                examId, startDate, endDate, minScore, maxScore);
+
+        // 2. Chuyển đổi sang DTO để trả về Frontend
+        return results.stream().map(s -> {
+            SubmissionHistoryResponse dto = new SubmissionHistoryResponse();
+            dto.setSubmissionId(s.getId());
+            dto.setExamTitle(s.getExam().getTitle());
+            dto.setScore(s.getScore());
+            dto.setSubmitTime(s.getSubmitTime());
+            dto.setCorrectAnswers(s.getCorrectAnswers());
+            dto.setTotalQuestions(s.getTotalQuestions());
+            dto.setStatus(s.getStatus().toString());
+
+            // Thông tin cá nhân
+            dto.setFullName(s.getUser().getFullName());
+            dto.setStudentId(s.getUser().getStudentId());
+            // dto.setUsername(s.getUser().getUsername()); // Nếu bạn cần hiển thị cả username
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public Long startExam(Long userId, StartExamRequest request) {
         // 1. Dùng trực tiếp userId từ tham số để tìm sinh viên

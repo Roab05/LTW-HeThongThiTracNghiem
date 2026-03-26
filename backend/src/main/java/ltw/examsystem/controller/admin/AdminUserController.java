@@ -9,6 +9,7 @@ import ltw.examsystem.repository.RoleRepository;
 import ltw.examsystem.repository.UserRepository;
 import ltw.examsystem.dto.response.SubmissionHistoryResponse;
 import ltw.examsystem.service.SubmissionService;
+import ltw.examsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,16 +27,10 @@ import java.util.stream.Collectors;
 public class AdminUserController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
     private SubmissionService submissionService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UserService userService;
 
     /**
      * ĐÃ SỬA: Gộp GET All và Search vào chung 1 API
@@ -43,115 +38,28 @@ public class AdminUserController {
      */
     @GetMapping
     public ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = false) String keyword) {
-        List<User> users;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCaseOrFullNameContainingIgnoreCase(keyword, keyword, keyword);
-        } else {
-            users = userRepository.findAll();
-        }
-        return ResponseEntity.ok(convertToDtoList(users));
+        return ResponseEntity.ok(userService.getUsers(keyword));
     }
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) {
-        // 1. Kiểm tra trùng lặp
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body("Lỗi: Tên đăng nhập đã tồn tại!");
+        try {
+            return ResponseEntity.ok(userService.createUser(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
-        }
-
-        // 2. Chuyển dữ liệu từ Request sang Entity
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        if (request.getFullName() != null) {
-            user.setFullName(request.getFullName());
-        }
-
-        if (request.getStudentId() != null && !request.getStudentId().isEmpty()) {
-            user.setStudentId(request.getStudentId());
-        }
-
-        // 3. Xử lý phân quyền linh hoạt dựa trên tham số 'role' truyền lên
-        Role userRole;
-        String roleStr = request.getRole();
-
-        // Nếu Frontend truyền lên "ADMIN", gán quyền quản trị trị viên
-        if (roleStr != null && roleStr.equalsIgnoreCase("ADMIN")) {
-            userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền ADMIN trong DB."));
-        } else {
-            // Mặc định nếu không truyền hoặc truyền sai thì gán quyền sinh viên (USER)
-            userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền USER trong DB."));
-        }
-
-        Set<Role> roles = new java.util.HashSet<>();
-        roles.add(userRole);
-        user.setRoles(roles);
-
-        // 4. Lưu và trả về kết quả
-        User savedUser = userRepository.save(user);
-        return ResponseEntity.ok(convertToDto(savedUser));
     }
 
     /**
      * ĐÃ SỬA: Đổi từ /update/{id} thành /{id}
      */
     @PutMapping("/{id}")
-    @Transactional // Đảm bảo tính toàn vẹn dữ liệu
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest userRequest) {
-        return userRepository.findById(id).map(user -> {
-
-            // 1. Kiểm tra trùng Username (trừ chính nó)
-            if (!user.getUsername().equals(userRequest.getUsername()) &&
-                    userRepository.existsByUsername(userRequest.getUsername())) {
-                return ResponseEntity.badRequest().body("Lỗi: Tên đăng nhập đã tồn tại!");
-            }
-
-            // 2. Kiểm tra trùng Email (trừ chính nó)
-            if (!user.getEmail().equals(userRequest.getEmail()) &&
-                    userRepository.existsByEmail(userRequest.getEmail())) {
-                return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
-            }
-
-            // 3. Cập nhật các thông tin cơ bản
-            user.setUsername(userRequest.getUsername());
-            user.setEmail(userRequest.getEmail());
-            if (userRequest.getFullName() != null && !userRequest.getFullName().isEmpty()) {
-                user.setFullName(userRequest.getFullName());
-            }
-
-            if (userRequest.getStudentId() != null) {
-                user.setStudentId(userRequest.getStudentId());
-            }
-
-            if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-            }
-
-            // 4. BỔ SUNG: Cập nhật Role nếu có truyền lên
-            if (userRequest.getRole() != null) {
-                String roleStr = userRequest.getRole();
-                Role userRole = roleRepository.findByName(
-                        roleStr.equalsIgnoreCase("ADMIN") ? ERole.ROLE_ADMIN : ERole.ROLE_USER
-                ).orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền."));
-
-                Set<Role> roles = new HashSet<>();
-                roles.add(userRole);
-                user.setRoles(roles);
-            }
-
-            userRepository.save(user);
-            return ResponseEntity.ok(convertToDto(user));
-
-        }).orElseGet(() -> {
-            // Trả về lỗi rõ ràng để tránh Spring Security redirect sang /error gây lỗi 401
-            return ResponseEntity.status(404).body("Lỗi: Không tìm thấy người dùng với ID " + id);
-        });
+        try {
+            return ResponseEntity.ok(userService.updateUser(id, userRequest));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // Trả về 400 kèm câu thông báo lỗi
+        }
     }
 
     /**
@@ -159,10 +67,12 @@ public class AdminUserController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        return userRepository.findById(id).map(user -> {
-            userRepository.delete(user);
+        try {
+            userService.deleteUser(id);
             return ResponseEntity.ok("Đã xóa người dùng thành công");
-        }).orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -172,21 +82,5 @@ public class AdminUserController {
     public ResponseEntity<List<SubmissionHistoryResponse>> getStudentResults(@PathVariable Long userId) {
         List<SubmissionHistoryResponse> history = submissionService.getHistoryByUserId(userId);
         return ResponseEntity.ok(history);
-    }
-
-    // --- Hàm bổ trợ để chuyển đổi Entity sang DTO ---
-    private UserResponse convertToDto(User user) {
-        UserResponse dto = new UserResponse();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setFullName(user.getFullName());
-        dto.setEmail(user.getEmail());
-        dto.setStudentId(user.getStudentId());
-        dto.setPassword(user.getPassword());
-        return dto;
-    }
-
-    private List<UserResponse> convertToDtoList(List<User> users) {
-        return users.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 }

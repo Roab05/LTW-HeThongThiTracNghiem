@@ -3,26 +3,17 @@ package ltw.examsystem.controller;
 import ltw.examsystem.dto.request.LoginRequest;
 import ltw.examsystem.dto.request.SignupRequest;
 import ltw.examsystem.dto.response.JwtResponse;
-import ltw.examsystem.entity.ERole;
-import ltw.examsystem.entity.Role;
-import ltw.examsystem.entity.User;
-import ltw.examsystem.repository.RoleRepository;
-import ltw.examsystem.repository.UserRepository;
 import ltw.examsystem.security.JwtUtils;
 import ltw.examsystem.security.UserDetailsImpl;
+import ltw.examsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -31,47 +22,31 @@ import java.util.stream.Collectors;
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private UserService userService; // Tiêm UserService vào đây
+
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-        if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Lỗi: Tên đăng nhập đã tồn tại!");
+        try {
+            // Chuyển đổi SignupRequest thành CreateUserRequest để tái sử dụng UserService
+            ltw.examsystem.dto.request.CreateUserRequest req = new ltw.examsystem.dto.request.CreateUserRequest();
+            req.setUsername(signupRequest.getUsername());
+            req.setEmail(signupRequest.getEmail());
+            req.setPassword(signupRequest.getPassword());
+            req.setFullName(signupRequest.getFullName());
+            req.setStudentId(signupRequest.getStudentId());
+            req.setRole("USER"); // Đăng ký ngoài luôn là USER
+
+            userService.createUser(req); // Giao toàn bộ việc kiểm tra và lưu cho Service
+            return ResponseEntity.ok("Đăng ký thành công!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Lỗi: Email đã được sử dụng!");
-        }
-
-        User user = new User();
-        user.setUsername(signupRequest.getUsername());
-        user.setEmail(signupRequest.getEmail());
-        user.setFullName(signupRequest.getFullName());
-        user.setStudentId(signupRequest.getStudentId());
-
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-
-        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy quyền USER trong Database."));
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        user.setRoles(roles);
-
-        userRepository.save(user);
-        return ResponseEntity.ok("Đăng ký thành công!");
     }
 
     @PostMapping("/login")

@@ -56,15 +56,12 @@ public class StudentSubmissionController {
     @GetMapping("/{submissionId}")
     public ResponseEntity<SubmissionDetailResponse> getSubmissionDetail(@PathVariable Long submissionId) {
         Long currentUserId = securityUtils.getCurrentUserId();
-        // Cần sửa Service để nhận thêm userId và check:
-        // if (!submission.getUser().getId().equals(currentUserId)) throw Exception("Forbidden");
         return ResponseEntity.ok(submissionService.getSubmissionDetail(currentUserId, submissionId));
     }
 
     @GetMapping("/{submissionId}/time-left")
     public ResponseEntity<TimeLeftResponse> getTimeLeft(@PathVariable Long submissionId) {
         Long currentUserId = securityUtils.getCurrentUserId();
-        // Tương tự, tránh việc sinh viên A xem trộm thời gian của sinh viên B
         return ResponseEntity.ok(submissionService.getTimeLeft(currentUserId, submissionId));
     }
 }

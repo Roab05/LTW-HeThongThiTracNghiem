@@ -1,29 +1,18 @@
 package ltw.examsystem.controller.admin;
 
-import ltw.examsystem.dto.request.AnswerOptionRequest;
 import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.request.QuestionRequest;
-import ltw.examsystem.dto.response.AnswerOptionResponse;
 import ltw.examsystem.dto.response.ExamDetailResponse;
 import ltw.examsystem.dto.response.ExamSummaryResponse;
-import ltw.examsystem.dto.response.QuestionResponse;
-import ltw.examsystem.entity.AnswerOption;
-import ltw.examsystem.entity.Exam;
-import ltw.examsystem.entity.Question;
-import ltw.examsystem.repository.ExamRepository;
-import ltw.examsystem.repository.QuestionRepository;
 import ltw.examsystem.service.ExamService;
 import ltw.examsystem.service.ExcelService;
+import ltw.examsystem.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -34,161 +23,86 @@ public class AdminExamController {
     private ExamService examService;
 
     @Autowired
-    private ExamRepository examRepository;
-
-    @Autowired
-    private QuestionRepository questionRepository;
+    private QuestionService questionService;
 
     @Autowired
     private ExcelService excelService;
 
-    /**
-     * Requirement c: Lấy danh sách kỳ thi để Admin quản lý
-     */
     @GetMapping
     public ResponseEntity<List<ExamSummaryResponse>> getAllExams() {
-        List<Exam> exams = examRepository.findAll();
-        return ResponseEntity.ok(exams.stream().map(this::convertToSummaryDto).collect(Collectors.toList()));
+        return ResponseEntity.ok(examService.getAllExams());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExamDetailResponse> getExamDetail(@PathVariable Long id) {
-        // Chỉ việc gọi Service và trả về kết quả
         return ResponseEntity.ok(examService.getExamDetailsForAdmin(id));
     }
 
-    /**
-     * Requirement c: Tạo kỳ thi mới (thông tin cơ bản)
-     */
     @PostMapping
-    public ResponseEntity<ExamSummaryResponse> createExam(@RequestBody ExamRequest request) {
-        Exam exam = new Exam();
-        mapRequestToEntity(request, exam);
-        Exam saved = examRepository.save(exam);
-        return ResponseEntity.ok(convertToSummaryDto(saved));
+    public ResponseEntity<?> createExam(@RequestBody ExamRequest request) {
+        try {
+            return ResponseEntity.ok(examService.createExam(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    /**
-     * Requirement c: Chỉnh sửa thông tin kỳ thi
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<ExamSummaryResponse> updateExam(@PathVariable Long id, @RequestBody ExamRequest request) {
-        return examRepository.findById(id).map(exam -> {
-            mapRequestToEntity(request, exam);
-            return ResponseEntity.ok(convertToSummaryDto(examRepository.save(exam)));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamRequest request) {
+        try {
+            return ResponseEntity.ok(examService.updateExam(id, request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    /**
-     * Requirement c: Xóa kỳ thi
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExam(@PathVariable Long id) {
-        examRepository.deleteById(id);
-        return ResponseEntity.ok("Đã xóa kỳ thi thành công");
+        try {
+            examService.deleteExam(id);
+            return ResponseEntity.ok("Đã xóa kỳ thi thành công");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PatchMapping("/{id}/publish")
-    public ResponseEntity<ExamSummaryResponse> togglePublish(
-            @PathVariable Long id,
-            @RequestParam boolean publish) {
-
-        return examRepository.findById(id).map(exam -> {
-            exam.setIsPublished(publish);
-            Exam saved = examRepository.save(exam);
-
-            String status = publish ? "MỞ" : "ĐÓNG";
-            System.out.println("✅ Đề thi ID " + id + " đã được " + status);
-
-            return ResponseEntity.ok(convertToSummaryDto(saved));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> togglePublish(@PathVariable Long id, @RequestParam boolean publish) {
+        try {
+            return ResponseEntity.ok(examService.togglePublish(id, publish));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{examId}/questions")
-    @Transactional
     public ResponseEntity<?> addQuestion(@PathVariable Long examId, @RequestBody QuestionRequest request) {
-        return examRepository.findById(examId).map(exam -> {
-            Question question = new Question();
-            question.setContent(request.getContent());
-            question.setExplanation(request.getExplanation());
-            question.setExam(exam);
-
-            List<AnswerOption> options = request.getOptions().stream().map(optReq -> {
-                AnswerOption opt = new AnswerOption();
-                opt.setContent(optReq.getContent());
-                opt.setIsCorrect(optReq.getIsCorrect());
-                opt.setQuestion(question);
-                return opt;
-            }).collect(Collectors.toList());
-            question.setOptions(options);
-
-            Question savedQuestion = questionRepository.save(question);
-
-            return ResponseEntity.ok(convertToQuestionDto(savedQuestion));
-        }).orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(questionService.addQuestion(examId, request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    /**
-     * Requirement c: Chỉnh sửa nội dung câu hỏi và các lựa chọn
-     */
     @PutMapping("/questions/{questionId}")
-    @Transactional
-    public ResponseEntity<QuestionResponse> updateQuestion(@PathVariable Long questionId, @RequestBody QuestionRequest request) {
-        return questionRepository.findById(questionId).map(question -> {
-            question.setContent(request.getContent());
-            question.setExplanation(request.getExplanation());
-
-            List<AnswerOption> dbOptions = question.getOptions();
-            List<AnswerOptionRequest> reqOptions = request.getOptions();
-
-            // Duyệt qua danh sách đáp án gửi lên
-            for (int i = 0; i < reqOptions.size(); i++) {
-                AnswerOptionRequest optReq = reqOptions.get(i);
-
-                if (i < dbOptions.size()) {
-                    // VỊ TRÍ NÀY ĐÃ CÓ TRONG DB -> CẬP NHẬT (GIỮ NGUYÊN ID)
-                    AnswerOption existingOpt = dbOptions.get(i);
-                    existingOpt.setContent(optReq.getContent());
-                    existingOpt.setIsCorrect(optReq.getIsCorrect());
-                } else {
-                    // VỊ TRÍ NÀY CHƯA CÓ (Vd: DB có 4 mà Request gửi 5) -> THÊM MỚI
-                    AnswerOption newOpt = new AnswerOption();
-                    newOpt.setContent(optReq.getContent());
-                    newOpt.setIsCorrect(optReq.getIsCorrect());
-                    newOpt.setQuestion(question);
-                    dbOptions.add(newOpt);
-                }
-            }
-
-            // Nếu Request gửi ít hơn DB (Vd: DB có 4 mà Request chỉ gửi 2) -> XÓA BỚT
-            if (dbOptions.size() > reqOptions.size()) {
-                int currentSize = dbOptions.size();
-                for (int i = currentSize - 1; i >= reqOptions.size(); i--) {
-                    dbOptions.remove(i);
-                }
-            }
-
-            Question saved = questionRepository.save(question);
-            return ResponseEntity.ok(convertToQuestionDto(saved));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateQuestion(@PathVariable Long questionId, @RequestBody QuestionRequest request) {
+        try {
+            return ResponseEntity.ok(questionService.updateQuestion(questionId, request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    /**
-     * Requirement c: Xóa một câu hỏi (Tự động xóa các lựa chọn kèm theo)
-     */
     @DeleteMapping("/questions/{questionId}")
     public ResponseEntity<?> deleteQuestion(@PathVariable Long questionId) {
-        if (!questionRepository.existsById(questionId)) {
+        try {
+            questionService.deleteQuestion(questionId);
+            return ResponseEntity.ok("Đã xóa câu hỏi thành công");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
-        questionRepository.deleteById(questionId);
-        return ResponseEntity.ok("Đã xóa câu hỏi thành công");
     }
 
-    /**
-     * Requirement c: NHẬP ĐỀ THI TỪ EXCEL
-     * Nhận 1 file .xlsx và đẩy vào kỳ thi có ID tương ứng
-     */
     @PostMapping("/{examId}/import-questions")
     public ResponseEntity<?> importQuestions(@PathVariable Long examId, @RequestParam("file") MultipartFile file) {
         try {
@@ -196,66 +110,6 @@ public class AdminExamController {
             return ResponseEntity.ok("Đã nhập danh sách câu hỏi thành công!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi khi nhập file: " + e.getMessage());
-        }
-    }
-
-    private ExamSummaryResponse convertToSummaryDto(Exam exam) {
-        ExamSummaryResponse dto = new ExamSummaryResponse();
-        dto.setId(exam.getId());
-        dto.setTitle(exam.getTitle());
-        dto.setDescription(exam.getDescription());
-        dto.setType(exam.getType());
-        dto.setStatus(exam.getStatus());
-        dto.setDurationMinutes(exam.getDurationMinutes());
-        dto.setIsPublished(exam.getIsPublished());
-
-        dto.setStartTime(exam.getStartTime());
-        dto.setEndTime(exam.getEndTime());// Đừng quên field này nhé
-        return dto;
-    }
-
-    private QuestionResponse convertToQuestionDto(Question q) {
-        QuestionResponse dto = new QuestionResponse();
-        dto.setId(q.getId());
-        dto.setContent(q.getContent());
-        dto.setExplanation(q.getExplanation());
-
-        // Cần map thêm list options để không bị null
-        if (q.getOptions() != null) {
-            dto.setOptions(q.getOptions().stream().map(opt -> {
-                AnswerOptionResponse optDto = new AnswerOptionResponse();
-                optDto.setId(opt.getId());
-                optDto.setContent(opt.getContent());
-                optDto.setIsCorrect(opt.getIsCorrect());
-                return optDto;
-            }).collect(Collectors.toList()));
-        }
-        return dto;
-    }
-
-    // Thay thế hàm mapRequestToEntity cũ trong AdminExamController.java
-    private void mapRequestToEntity(ExamRequest request, Exam exam) {
-        exam.setTitle(request.getTitle());
-        exam.setDescription(request.getDescription());
-        exam.setDurationMinutes(request.getDurationMinutes());
-        exam.setStatus(request.getStatus());
-        exam.setType(request.getType());
-        if (request.getIsPublished() != null) exam.setIsPublished(request.getIsPublished());
-
-        // BỔ SUNG: Xử lý thời gian cho kỳ thi có giới hạn
-        if (ltw.examsystem.entity.ExamStatus.TIME_RESTRICTED.equals(request.getStatus())) {
-            if (request.getStartTime() == null || request.getEndTime() == null) {
-                throw new IllegalArgumentException("Kỳ thi có giới hạn thời gian bắt buộc phải có thời gian bắt đầu và kết thúc.");
-            }
-            if (request.getStartTime().isAfter(request.getEndTime())) {
-                throw new IllegalArgumentException("Thời gian bắt đầu không được lớn hơn thời gian kết thúc.");
-            }
-            exam.setStartTime(request.getStartTime());
-            exam.setEndTime(request.getEndTime());
-        } else {
-            // Nếu chuyển từ TIME_RESTRICTED sang trạng thái khác (như OPEN), cần xóa thời gian cũ
-            exam.setStartTime(null);
-            exam.setEndTime(null);
         }
     }
 }

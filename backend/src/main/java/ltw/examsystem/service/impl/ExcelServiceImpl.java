@@ -6,6 +6,7 @@ import ltw.examsystem.entity.Question;
 import ltw.examsystem.entity.Submission;
 import ltw.examsystem.repository.ExamRepository;
 import ltw.examsystem.repository.QuestionRepository;
+import ltw.examsystem.repository.SubmissionRepository;
 import ltw.examsystem.service.ExcelService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,9 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ExcelServiceImpl implements ExcelService {
@@ -29,6 +32,10 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    // ĐÃ THÊM: Repository để tự động lấy dữ liệu bài thi
+    @Autowired
+    private SubmissionRepository submissionRepository;
 
     @Override
     @Transactional
@@ -85,14 +92,19 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    // ĐÃ SỬA: Đổi tham số thành các tiêu chí lọc
     @Override
-    public byte[] exportSubmissionsToExcel(List<Submission> submissions) throws IOException {
+    public byte[] exportSubmissionsToExcel(Long examId, LocalDateTime startDate, LocalDateTime endDate, Double minScore, Double maxScore) throws IOException {
+
+        // ĐÃ SỬA: Tự động query và lọc dữ liệu (lọc null score) tại đây
+        List<Submission> validResults = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore)
+                .stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
+
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Ket_Qua_Thi");
 
             // 1. Tạo Header (Dòng tiêu đề)
             Row headerRow = sheet.createRow(0);
-            // ĐÃ SỬA: Tăng số lượng cột và thêm "Mã SV", "Họ và tên"
             String[] columns = {"STT", "Mã SV", "Họ và tên", "Kỳ thi", "Điểm số", "Số câu đúng", "Thời gian nộp"};
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -101,27 +113,18 @@ public class ExcelServiceImpl implements ExcelService {
 
             // 2. Đổ dữ liệu
             int rowIdx = 1;
-            for (Submission s : submissions) {
+            for (Submission s : validResults) { // Dùng validResults
                 Row row = sheet.createRow(rowIdx++);
                 row.createCell(0).setCellValue(rowIdx - 1);
 
-                // ĐÃ SỬA: Lấy Mã sinh viên (xử lý null nếu là admin thi thử)
                 String studentId = s.getUser().getStudentId() != null ? s.getUser().getStudentId() : "N/A";
                 row.createCell(1).setCellValue(studentId);
 
-                // ĐÃ SỬA: Ưu tiên FullName, nếu chưa cập nhật thì dùng Username
                 String displayName = s.getUser().getFullName() != null ? s.getUser().getFullName() : s.getUser().getUsername();
                 row.createCell(2).setCellValue(displayName);
 
-                // Lưu ý: Các cell phía sau phải tăng index lên 1 bậc vì đã chèn thêm cột Mã SV
                 row.createCell(3).setCellValue(s.getExam().getTitle());
-
-                if (s.getScore() != null) {
-                    row.createCell(4).setCellValue(s.getScore());
-                } else {
-                    row.createCell(4).setCellValue(0.0);
-                }
-
+                row.createCell(4).setCellValue(s.getScore());
                 row.createCell(5).setCellValue(s.getCorrectAnswers() + "/" + s.getTotalQuestions());
                 row.createCell(6).setCellValue(s.getSubmitTime().toString());
             }

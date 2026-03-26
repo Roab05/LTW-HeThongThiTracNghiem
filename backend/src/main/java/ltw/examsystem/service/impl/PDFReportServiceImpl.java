@@ -7,6 +7,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import ltw.examsystem.dto.response.QuestionResultResponse;
 import ltw.examsystem.dto.response.SubmissionDetailResponse;
 import ltw.examsystem.entity.Submission;
+import ltw.examsystem.repository.SubmissionRepository;
 import ltw.examsystem.service.PDFReportService;
 import ltw.examsystem.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PDFReportServiceImpl implements PDFReportService {
@@ -23,8 +27,25 @@ public class PDFReportServiceImpl implements PDFReportService {
     @Autowired
     private SubmissionService submissionService;
 
+    // ĐÃ THÊM: Repository để tự động lấy dữ liệu
+    @Autowired
+    private SubmissionRepository submissionRepository;
+
+    // ĐÃ SỬA: Đổi tham số thành các tiêu chí lọc
     @Override
-    public byte[] exportStatsToPdf(List<Submission> submissions, Map<String, Object> summaryData) throws IOException {
+    public byte[] exportStatsToPdf(Long examId, LocalDateTime startDate, LocalDateTime endDate, Double minScore, Double maxScore) throws IOException {
+
+        // 1. Tự động query và lọc dữ liệu tại đây
+        List<Submission> validResults = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore)
+                .stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
+
+        // 2. Tự tính toán dữ liệu tóm tắt (Summary Data)
+        Map<String, Object> summaryData = new HashMap<>();
+        summaryData.put("total", validResults.size());
+        double avg = validResults.stream().mapToDouble(Submission::getScore).average().orElse(0.0);
+        summaryData.put("average", Math.round(avg * 100.0) / 100.0);
+
+        // 3. Tiến hành vẽ PDF
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, out);
@@ -48,14 +69,14 @@ public class PDFReportServiceImpl implements PDFReportService {
         PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
         table.addCell("STT");
-        table.addCell("Mã SV");      // Cột mới
-        table.addCell("Họ và tên");  // Đổi tên cột
+        table.addCell("Mã SV");
+        table.addCell("Họ và tên");
         table.addCell("Kỳ thi");
         table.addCell("Điểm số");
         table.addCell("Thời gian");
 
         int count = 1;
-        for (Submission s : submissions) {
+        for (Submission s : validResults) { // Đổi thành validResults
             table.addCell(String.valueOf(count++));
 
             // Điền Mã SV
@@ -104,17 +125,16 @@ public class PDFReportServiceImpl implements PDFReportService {
         document.add(new Paragraph("Điểm số: " + detail.getScore() + "/10", normalFont));
         document.add(new Paragraph("-----------------------------------------------------------------------"));
 
-        // 3. Liệt kê chi tiết từng câu hỏi (Requirement e)
+        // 3. Liệt kê chi tiết từng câu hỏi
         int i = 1;
         for (QuestionResultResponse q : detail.getQuestionResults()) {
-            Paragraph pQuestion = new Paragraph("Câu " + i + ": " + q.getContent(),
-                    normalFont);
+            Paragraph pQuestion = new Paragraph("Câu " + i + ": " + q.getContent(), normalFont);
             document.add(pQuestion);
 
             // Hiển thị đáp án đã chọn và đáp án đúng
             String statusText = q.getIsCorrect() ? "[Đúng]" : "[Sai]";
             document.add(new Paragraph("   - Trạng thái: " + statusText, normalFont));
-            document.add(new Paragraph("   - Giải thích: " + q.getExplanation(), normalFont)); // Giải thích từ DB
+            document.add(new Paragraph("   - Giải thích: " + q.getExplanation(), normalFont));
             document.add(new Paragraph(" "));
             i++;
         }
