@@ -9,6 +9,8 @@ import java.util.List;
 public class SubmissionDetailResponse {
     private Long submissionId;
     private String examTitle;
+    private String fullName;
+    private String studentId;
     private Double score;
     private LocalDateTime submitTime;
 

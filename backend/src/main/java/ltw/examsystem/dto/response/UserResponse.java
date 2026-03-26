@@ -7,6 +7,8 @@ import lombok.Setter;
 public class UserResponse {
     private Long id;
     private String username;
+    private String fullName;
     private String email;
     private String studentId;
+    private String password;
 }

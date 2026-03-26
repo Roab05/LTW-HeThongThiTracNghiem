@@ -92,27 +92,38 @@ public class ExcelServiceImpl implements ExcelService {
 
             // 1. Tạo Header (Dòng tiêu đề)
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"STT", "Sinh viên", "Kỳ thi", "Điểm số", "Số câu đúng", "Thời gian nộp"};
+            // ĐÃ SỬA: Tăng số lượng cột và thêm "Mã SV", "Họ và tên"
+            String[] columns = {"STT", "Mã SV", "Họ và tên", "Kỳ thi", "Điểm số", "Số câu đúng", "Thời gian nộp"};
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columns[i]);
-                // (Tùy chọn) Thêm style cho header đậm lên
             }
 
-            // 2. Đổ dữ liệu từ danh sách vào các dòng tiếp theo
+            // 2. Đổ dữ liệu
             int rowIdx = 1;
             for (Submission s : submissions) {
                 Row row = sheet.createRow(rowIdx++);
                 row.createCell(0).setCellValue(rowIdx - 1);
-                row.createCell(1).setCellValue(s.getUser().getUsername());
-                row.createCell(2).setCellValue(s.getExam().getTitle());
+
+                // ĐÃ SỬA: Lấy Mã sinh viên (xử lý null nếu là admin thi thử)
+                String studentId = s.getUser().getStudentId() != null ? s.getUser().getStudentId() : "N/A";
+                row.createCell(1).setCellValue(studentId);
+
+                // ĐÃ SỬA: Ưu tiên FullName, nếu chưa cập nhật thì dùng Username
+                String displayName = s.getUser().getFullName() != null ? s.getUser().getFullName() : s.getUser().getUsername();
+                row.createCell(2).setCellValue(displayName);
+
+                // Lưu ý: Các cell phía sau phải tăng index lên 1 bậc vì đã chèn thêm cột Mã SV
+                row.createCell(3).setCellValue(s.getExam().getTitle());
+
                 if (s.getScore() != null) {
-                    row.createCell(3).setCellValue(s.getScore());
+                    row.createCell(4).setCellValue(s.getScore());
                 } else {
-                    row.createCell(3).setCellValue(0.0); // Hoặc để trống: row.createCell(3).setCellValue("");
+                    row.createCell(4).setCellValue(0.0);
                 }
-                row.createCell(4).setCellValue(s.getCorrectAnswers() + "/" + s.getTotalQuestions());
-                row.createCell(5).setCellValue(s.getSubmitTime().toString());
+
+                row.createCell(5).setCellValue(s.getCorrectAnswers() + "/" + s.getTotalQuestions());
+                row.createCell(6).setCellValue(s.getSubmitTime().toString());
             }
 
             workbook.write(out);

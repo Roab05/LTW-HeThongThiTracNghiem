@@ -113,6 +113,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         SubmissionResultResponse response = new SubmissionResultResponse();
         response.setSubmissionId(submission.getId());
         response.setExamTitle(exam.getTitle());
+        response.setFullName(submission.getUser().getFullName());
+        response.setStudentId(submission.getUser().getStudentId());
         response.setSubmitTime(submission.getSubmitTime());
         response.setScore(score);
         response.setCorrectAnswers(correctCount);
@@ -199,6 +201,9 @@ public class SubmissionServiceImpl implements SubmissionService {
             dto.setTotalQuestions(sub.getTotalQuestions());
             dto.setSubmitTime(sub.getSubmitTime());
 
+            dto.setFullName(sub.getUser().getFullName());
+            dto.setStudentId(sub.getUser().getStudentId());
+
             if (sub.getSubmitTime() != null) {
                 dto.setStatus("Hoàn thành");
             } else {
@@ -222,6 +227,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         resp.setExamTitle(submission.getExam().getTitle());
         resp.setScore(submission.getScore());
         resp.setSubmitTime(submission.getSubmitTime());
+        resp.setFullName(submission.getUser().getFullName());
+        resp.setStudentId(submission.getUser().getStudentId());
 
         List<QuestionResultResponse> details = submission.getDetails().stream().map(detail -> {
             Question q = detail.getQuestion();

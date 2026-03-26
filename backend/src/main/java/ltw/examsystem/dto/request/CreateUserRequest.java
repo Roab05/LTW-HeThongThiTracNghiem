@@ -10,7 +10,7 @@ public class CreateUserRequest {
     private String email;
     private String password;
     private String studentId;
-
+    private String fullName;
     // Trường này sẽ nhận giá trị "ADMIN" hoặc "USER" từ Frontend
     private String role;
 }

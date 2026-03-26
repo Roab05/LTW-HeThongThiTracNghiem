@@ -28,10 +28,11 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Kiểm tra xem đã có admin_code chưa, nếu chưa thì hệ thống tự tạo
-        if (!userRepository.existsByUsername("admin_code")) {
+        if (!userRepository.existsByUsername("admin")) {
             User user = new User();
-            user.setUsername("admin_code");
+            user.setUsername("admin");
             user.setEmail("admin@code.com");
+            user.setFullName("admin");
             // ĐỂ SPRING BOOT TỰ MÃ HÓA BẰNG THUẬT TOÁN CHUẨN CỦA NÓ
             user.setPassword(passwordEncoder.encode("123456"));
 

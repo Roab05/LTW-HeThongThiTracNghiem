@@ -44,11 +44,12 @@ public class PDFReportServiceImpl implements PDFReportService {
         document.add(new Paragraph("Điểm trung bình: " + summaryData.get("average"), normalFont));
         document.add(new Paragraph(" "));
 
-        // Bảng dữ liệu
-        PdfPTable table = new PdfPTable(5);
+
+        PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
         table.addCell("STT");
-        table.addCell("Sinh viên");
+        table.addCell("Mã SV");      // Cột mới
+        table.addCell("Họ và tên");  // Đổi tên cột
         table.addCell("Kỳ thi");
         table.addCell("Điểm số");
         table.addCell("Thời gian");
@@ -56,7 +57,14 @@ public class PDFReportServiceImpl implements PDFReportService {
         int count = 1;
         for (Submission s : submissions) {
             table.addCell(String.valueOf(count++));
-            table.addCell(s.getUser().getUsername());
+
+            // Điền Mã SV
+            table.addCell(s.getUser().getStudentId() != null ? s.getUser().getStudentId() : "N/A");
+
+            // Điền Họ và tên
+            String displayName = s.getUser().getFullName() != null ? s.getUser().getFullName() : s.getUser().getUsername();
+            table.addCell(displayName);
+
             table.addCell(s.getExam().getTitle());
             table.addCell(String.valueOf(s.getScore()));
             table.addCell(s.getSubmitTime().toLocalDate().toString());
@@ -86,11 +94,15 @@ public class PDFReportServiceImpl implements PDFReportService {
         document.add(title);
         document.add(new Paragraph(" "));
 
+        String studentName = detail.getFullName() != null ? detail.getFullName() : "N/A";
+        String studentIdStr = detail.getStudentId() != null ? detail.getStudentId() : "N/A";
+
+        document.add(new Paragraph("Họ và tên: " + studentName, normalFont));
+        document.add(new Paragraph("Mã sinh viên: " + studentIdStr, normalFont));
         document.add(new Paragraph("Kỳ thi: " + detail.getExamTitle(), normalFont));
         document.add(new Paragraph("Thời gian nộp: " + detail.getSubmitTime(), normalFont));
         document.add(new Paragraph("Điểm số: " + detail.getScore() + "/10", normalFont));
         document.add(new Paragraph("-----------------------------------------------------------------------"));
-        document.add(new Paragraph(" "));
 
         // 3. Liệt kê chi tiết từng câu hỏi (Requirement e)
         int i = 1;

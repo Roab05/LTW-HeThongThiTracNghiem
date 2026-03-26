@@ -58,76 +58,60 @@ public class AdminStatsController {
     }
 
     /**
-     * Requirement d: Lọc kết quả nâng cao theo kỳ thi, thời gian và điểm số
-     */
-    @GetMapping("/filter")
-    public ResponseEntity<List<SubmissionHistoryResponse>> filterSubmissions(
-            @RequestParam(required = false) Long examId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) Double minScore,
-            @RequestParam(required = false) Double maxScore) {
-
-        // Gọi hàm lọc linh hoạt từ Repository
-        List<Submission> results = submissionRepository.filterSubmissions(
-                examId, startDate, endDate, minScore, maxScore);
-
-        // Chuyển đổi sang DTO để hiển thị trên bảng thống kê của Frontend
-        List<SubmissionHistoryResponse> response = results.stream().map(s -> {
-            SubmissionHistoryResponse dto = new SubmissionHistoryResponse();
-            dto.setSubmissionId(s.getId());
-            dto.setExamTitle(s.getExam().getTitle());
-            dto.setScore(s.getScore());
-            dto.setSubmitTime(s.getSubmitTime());
-            dto.setCorrectAnswers(s.getCorrectAnswers());
-            dto.setTotalQuestions(s.getTotalQuestions());
-            return dto;
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
      * Requirement d: Thống kê chi tiết theo kỳ thi (Dữ liệu cho biểu đồ)
      */
-    @GetMapping("/exam/{examId}")
-    public ResponseEntity<ExamStatsResponse> getExamStats(@PathVariable Long examId) {
-        Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy kỳ thi với ID: " + examId));
+    @GetMapping("/exam-stats") // Đổi URL để linh hoạt hơn (không bắt buộc id trong path nếu muốn lọc rộng)
+    public ResponseEntity<ExamStatsResponse> getExamStats(
+            @RequestParam(required = false) Long examId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
-        long totalStudents = userRepository.count();
+        // 1. Lấy thông tin kỳ thi (nếu có examId) để hiển thị tiêu đề báo cáo
+        String examTitle = "Thống kê tổng hợp";
+        if (examId != null) {
+            examTitle = examRepository.findById(examId)
+                    .map(Exam::getTitle)
+                    .orElse("Kỳ thi không tồn tại");
+        }
 
-        // ĐÃ SỬA: Lọc bỏ những bài chưa có điểm (null) ngay tại đây
-        List<Submission> validSubmissions = submissionRepository.findByExamId(examId).stream()
+        // 2. Tái sử dụng hàm lọc linh hoạt từ Repository (đã có sẵn trong project của bạn)
+        // Truyền minScore/maxScore là null vì ở đây ta chỉ cần lọc theo thời gian/kỳ thi
+        List<Submission> allSubmissions = submissionRepository.filterSubmissions(
+                examId, startDate, endDate, null, null);
+
+        // 3. Lọc bỏ các bản ghi chưa có điểm để tránh NullPointerException khi tính toán
+        List<Submission> validSubmissions = allSubmissions.stream()
                 .filter(s -> s.getScore() != null)
                 .collect(Collectors.toList());
 
+        long totalStudents = userRepository.count();
         ExamStatsResponse stats = new ExamStatsResponse();
         stats.setExamId(examId);
-        stats.setExamTitle(exam.getTitle());
+        stats.setExamTitle(examTitle);
         stats.setParticipantsCount(validSubmissions.size());
 
         if (!validSubmissions.isEmpty()) {
-            // Tính điểm trung bình (An toàn vì đã lọc null ở trên)
+            // Tính điểm trung bình an toàn
             double avg = validSubmissions.stream()
                     .mapToDouble(Submission::getScore)
                     .average()
                     .orElse(0.0);
             stats.setAverageScore(Math.round(avg * 100.0) / 100.0);
 
-            // Tính tỷ lệ hoàn thành
+            // Tính tỷ lệ hoàn thành dựa trên tổng số sinh viên hệ thống
             if (totalStudents > 0) {
                 double rate = (double) validSubmissions.size() / totalStudents * 100;
                 stats.setCompletionRate(Math.round(rate * 100.0) / 100.0);
             }
 
-            // Tính biểu đồ (An toàn vì đã lọc null ở trên)
+            // Tính biểu đồ phân bố điểm
             Map<String, Long> distribution = new HashMap<>();
-            distribution.put("Yêu (0-5)", validSubmissions.stream().filter(s -> s.getScore() < 5).count());
+            distribution.put("Yếu (0-5)", validSubmissions.stream().filter(s -> s.getScore() < 5).count());
             distribution.put("Khá (5-8)", validSubmissions.stream().filter(s -> s.getScore() >= 5 && s.getScore() < 8).count());
             distribution.put("Giỏi (8-10)", validSubmissions.stream().filter(s -> s.getScore() >= 8).count());
             stats.setScoreDistribution(distribution);
         }
+
         return ResponseEntity.ok(stats);
     }
 

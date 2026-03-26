@@ -45,7 +45,7 @@ public class AdminUserController {
     public ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = false) String keyword) {
         List<User> users;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCase(keyword, keyword);
+            users = userRepository.findByUsernameContainingIgnoreCaseOrStudentIdContainingIgnoreCaseOrFullNameContainingIgnoreCase(keyword, keyword, keyword);
         } else {
             users = userRepository.findAll();
         }
@@ -67,6 +67,9 @@ public class AdminUserController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
 
         if (request.getStudentId() != null && !request.getStudentId().isEmpty()) {
             user.setStudentId(request.getStudentId());
@@ -118,6 +121,9 @@ public class AdminUserController {
             // 3. Cập nhật các thông tin cơ bản
             user.setUsername(userRequest.getUsername());
             user.setEmail(userRequest.getEmail());
+            if (userRequest.getFullName() != null && !userRequest.getFullName().isEmpty()) {
+                user.setFullName(userRequest.getFullName());
+            }
 
             if (userRequest.getStudentId() != null) {
                 user.setStudentId(userRequest.getStudentId());
@@ -173,8 +179,10 @@ public class AdminUserController {
         UserResponse dto = new UserResponse();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
         dto.setStudentId(user.getStudentId());
+        dto.setPassword(user.getPassword());
         return dto;
     }
 

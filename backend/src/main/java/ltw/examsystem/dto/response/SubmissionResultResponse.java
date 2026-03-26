@@ -10,6 +10,8 @@ import java.util.List;
 @Data
 public class SubmissionResultResponse {
     private Long submissionId;
+    private String fullName;
+    private String studentId;
     private String examTitle;
     private Double score;
     private Integer correctAnswers;
