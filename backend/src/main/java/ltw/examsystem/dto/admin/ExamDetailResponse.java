@@ -17,7 +17,7 @@ public class ExamDetailResponse {
     private String status;
     private Boolean isPublished;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;// Má»›i bá»• sung
+    private LocalDateTime endTime;
     private Integer durationMinutes;
 
     private List<?> questions;

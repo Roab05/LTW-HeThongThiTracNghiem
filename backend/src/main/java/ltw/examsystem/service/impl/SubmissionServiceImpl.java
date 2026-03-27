@@ -28,10 +28,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Autowired
     private UserRepository userRepository;
 
-    /**
-     * Requirement c: Xá»­ lÃ½ ná»™p bÃ i (Chá»§ Ä‘á»™ng hoáº·c Tá»± Ä‘á»™ng khi háº¿t giá»)
-     */
-    @Override
+
     @Transactional
     public SubmissionResultResponse submitExam(Long userId, Long submissionId, SubmitExamRequest request) {
         Submission submission = submissionRepository.findById(submissionId)
@@ -120,7 +117,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         return response;
     }
-
     @Override
     public TimeLeftResponse getTimeLeft(Long userId, Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId)
@@ -151,7 +147,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         return response;
     }
 
-    @Override
     @Transactional
     public Long startExam(Long userId, StartExamRequest request) {
         User user = userRepository.findById(userId)
@@ -169,7 +164,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission = submissionRepository.save(submission);
         return submission.getId();
     }
-
 
     @Override
     public List<SubmissionHistoryResponse> getHistoryByUserId(Long userId) {
@@ -193,8 +187,6 @@ public class SubmissionServiceImpl implements SubmissionService {
             return dto;
         }).collect(Collectors.toList());
     }
-
-
     @Override
     public SubmissionDetailResponse getSubmissionDetail(Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId)
@@ -239,7 +231,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         resp.setQuestionResults(details);
         return resp;
     }
-
     @Override
     public SubmissionDetailResponse getSubmissionDetail(Long userId, Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId)

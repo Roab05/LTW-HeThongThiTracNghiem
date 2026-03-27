@@ -65,7 +65,6 @@ public class ExamServiceImpl implements ExamService {
 
         return response;
     }
-
     @Override
     public ExamDetailResponse getExamDetailsForAdmin(Long examId) {
         Exam exam = examRepository.findById(examId)

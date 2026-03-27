@@ -15,8 +15,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     @Query("SELECT AVG(s.score) FROM Submission s")
     Double getGlobalAverageScore();
 
-    List<Submission> findByExamId(Long examId);
-
     List<Submission> findByUserId(Long userId);
 
     @Query("SELECT s FROM Submission s WHERE " +

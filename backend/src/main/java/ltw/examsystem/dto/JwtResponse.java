@@ -1,4 +1,4 @@
-package ltw.examsystem.dto.student;
+package ltw.examsystem.dto;
 
 import lombok.Getter;
 import lombok.Setter;

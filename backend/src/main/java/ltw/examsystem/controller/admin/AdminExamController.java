@@ -17,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -68,11 +65,11 @@ public class AdminExamController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExam(@PathVariable Long id) {
         examRepository.deleteById(id);
-        return ResponseEntity.ok("Đã xóa kỳ thi thành công");
+        return ResponseEntity.ok("Successfully deleted exam");
     }
 
     @PatchMapping("/{id}/publish")
-    public ResponseEntity<ExamSummaryResponse> togglePublish(
+    public ResponseEntity<ExamSummaryResponse> setActive(
             @PathVariable Long id,
             @RequestParam boolean publish) {
 
@@ -80,8 +77,8 @@ public class AdminExamController {
             exam.setIsPublished(publish);
             Exam saved = examRepository.save(exam);
 
-            String status = publish ? "Mở" : "Đóng";
-            System.out.println("✅ Đề thi ID " + id + " đã được " + status);
+            String status = publish ? "Open" : "Close";
+            System.out.println("✅ ID Exam " + id + " was " + status);
 
             return ResponseEntity.ok(convertToSummaryDto(saved));
         }).orElse(ResponseEntity.notFound().build());
@@ -155,7 +152,7 @@ public class AdminExamController {
             return ResponseEntity.notFound().build();
         }
         questionRepository.deleteById(questionId);
-        return ResponseEntity.ok("successed");
+        return ResponseEntity.ok("Successfully Deleted Question");
     }
 
     private ExamSummaryResponse convertToSummaryDto(Exam exam) {

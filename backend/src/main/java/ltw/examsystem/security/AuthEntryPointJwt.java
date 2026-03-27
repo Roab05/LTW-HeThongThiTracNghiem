@@ -22,9 +22,9 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
+            throws IOException {
 
-        logger.error("Lá»—i xÃ¡c thá»±c (Unauthorized) - URL: {}, Message: {}", request.getServletPath(), authException.getMessage());
+        logger.error("(Unauthorized) - URL: {}, Message: {}", request.getServletPath(), authException.getMessage());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -32,7 +32,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         final Map<String, Object> body = new HashMap<>();
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", "Báº¡n chÆ°a Ä‘Äƒng nháº­p hoáº·c phiÃªn lÃ m viá»‡c Ä‘Ã£ háº¿t háº¡n. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.");
+        body.put("message", "Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.");
         body.put("path", request.getServletPath());
 
         final ObjectMapper mapper = new ObjectMapper();

@@ -35,7 +35,7 @@ public class DataSeeder implements CommandLineRunner {
             user.setPassword(passwordEncoder.encode("123456"));
 
             Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("KhÃ´ng tÃ¬m tháº¥y quyá»n ADMIN"));
+                    .orElseThrow(() -> new RuntimeException("NOT FOUND ADMIN"));
 
             Set<Role> roles = new HashSet<>();
             roles.add(adminRole);
@@ -43,7 +43,7 @@ public class DataSeeder implements CommandLineRunner {
 
             userRepository.save(user);
             System.out.println("==========================================================");
-            System.out.println("âœ… ÄÃƒ Táº O THÃ€NH CÃ”NG TÃ€I KHOáº¢N ADMIN: admin_code / 123456 ");
+            System.out.println("Created admin account: admin_code / 123456 ");
             System.out.println("==========================================================");
         }
         }

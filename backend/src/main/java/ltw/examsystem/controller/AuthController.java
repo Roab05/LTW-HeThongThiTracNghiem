@@ -2,7 +2,7 @@ package ltw.examsystem.controller;
 
 import ltw.examsystem.dto.student.LoginRequest;
 import ltw.examsystem.dto.student.SignupRequest;
-import ltw.examsystem.dto.student.JwtResponse;
+import ltw.examsystem.dto.JwtResponse;
 import ltw.examsystem.entity.ERole;
 import ltw.examsystem.entity.Role;
 import ltw.examsystem.entity.User;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -70,7 +69,7 @@ public class AuthController {
         user.setRoles(roles);
 
         userRepository.save(user);
-        return ResponseEntity.ok("Đăng ký thành công!");
+        return ResponseEntity.ok("Successed login!");
     }
 
     @PostMapping("/login")

@@ -147,7 +147,7 @@ public class AdminUserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userRepository.findById(id).map(user -> {
             userRepository.delete(user);
-            return ResponseEntity.ok("Đã xóa người dùng thành công");
+            return ResponseEntity.ok("Successfully deleted user with ID " + id);
         }).orElse(ResponseEntity.notFound().build());
     }
 

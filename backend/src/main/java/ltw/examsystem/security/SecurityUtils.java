@@ -15,6 +15,6 @@ public class SecurityUtils {
             return userDetails.getId();
         }
 
-        throw new RuntimeException("KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin xÃ¡c thá»±c (Unauthorized)");
+        throw new RuntimeException("Unauthorized: No authenticated user found");
     }
 }
