@@ -19,6 +19,9 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
     @Column(unique = true, nullable = false)
     private String email;
 
@@ -36,9 +39,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public User(String username, String email, String password) {
+    public User(String username, String fullName, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.fullName = fullName;
     }
 }

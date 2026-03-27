@@ -29,6 +29,9 @@ public class Exam {
     @Enumerated(EnumType.STRING)
     private ExamStatus status;
 
+    @Column(name = "is_published", nullable = false)
+    private Boolean isPublished = false;
+
     // Thời gian làm bài (phút)
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;

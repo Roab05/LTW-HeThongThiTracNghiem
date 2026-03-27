@@ -1,11 +1,13 @@
 package ltw.examsystem.service.impl;
 
 import com.lowagie.text.*;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import ltw.examsystem.dto.response.QuestionResultResponse;
 import ltw.examsystem.dto.response.SubmissionDetailResponse;
 import ltw.examsystem.entity.Submission;
+import ltw.examsystem.repository.SubmissionRepository;
 import ltw.examsystem.service.PDFReportService;
 import ltw.examsystem.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PDFReportServiceImpl implements PDFReportService {
@@ -22,39 +27,65 @@ public class PDFReportServiceImpl implements PDFReportService {
     @Autowired
     private SubmissionService submissionService;
 
+    // ĐÃ THÊM: Repository để tự động lấy dữ liệu
+    @Autowired
+    private SubmissionRepository submissionRepository;
+
+    // ĐÃ SỬA: Đổi tham số thành các tiêu chí lọc
     @Override
-    public byte[] exportStatsToPdf(List<Submission> submissions, Map<String, Object> summaryData) throws IOException {
+    public byte[] exportStatsToPdf(Long examId, LocalDateTime startDate, LocalDateTime endDate, Double minScore, Double maxScore) throws IOException {
+
+        // 1. Tự động query và lọc dữ liệu tại đây
+        List<Submission> validResults = submissionRepository.filterSubmissions(examId, startDate, endDate, minScore, maxScore)
+                .stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
+
+        // 2. Tự tính toán dữ liệu tóm tắt (Summary Data)
+        Map<String, Object> summaryData = new HashMap<>();
+        summaryData.put("total", validResults.size());
+        double avg = validResults.stream().mapToDouble(Submission::getScore).average().orElse(0.0);
+        summaryData.put("average", Math.round(avg * 100.0) / 100.0);
+
+        // 3. Tiến hành vẽ PDF
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, out);
 
         document.open();
 
-        // Cấu hình Font và Tiêu đề
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Paragraph title = new Paragraph("BAO CAO THONG KE KET QUA THI (PDF)", fontTitle);
+        BaseFont bf = BaseFont.createFont("src/main/resources/fonts/times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(bf, 18, Font.BOLD);
+        Font normalFont = new Font(bf, 13);
+        Paragraph title = new Paragraph("BÁO CÁO THỐNG KÊ KẾT QUẢ THI", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(new Paragraph(" "));
 
         // Thông tin tóm tắt
-        document.add(new Paragraph("Tong so luot thi: " + summaryData.get("total")));
-        document.add(new Paragraph("Diem trung binh: " + summaryData.get("average")));
+        document.add(new Paragraph("Tổng số lượt thi: " + summaryData.get("total"), normalFont));
+        document.add(new Paragraph("Điểm trung bình: " + summaryData.get("average"), normalFont));
         document.add(new Paragraph(" "));
 
-        // Bảng dữ liệu
-        PdfPTable table = new PdfPTable(5);
+
+        PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
         table.addCell("STT");
-        table.addCell("Sinh vien");
-        table.addCell("Ky thi");
-        table.addCell("Diem so");
-        table.addCell("Thoi gian");
+        table.addCell("Mã SV");
+        table.addCell("Họ và tên");
+        table.addCell("Kỳ thi");
+        table.addCell("Điểm số");
+        table.addCell("Thời gian");
 
         int count = 1;
-        for (Submission s : submissions) {
+        for (Submission s : validResults) { // Đổi thành validResults
             table.addCell(String.valueOf(count++));
-            table.addCell(s.getUser().getUsername());
+
+            // Điền Mã SV
+            table.addCell(s.getUser().getStudentId() != null ? s.getUser().getStudentId() : "N/A");
+
+            // Điền Họ và tên
+            String displayName = s.getUser().getFullName() != null ? s.getUser().getFullName() : s.getUser().getUsername();
+            table.addCell(displayName);
+
             table.addCell(s.getExam().getTitle());
             table.addCell(String.valueOf(s.getScore()));
             table.addCell(s.getSubmitTime().toLocalDate().toString());
@@ -76,29 +107,34 @@ public class PDFReportServiceImpl implements PDFReportService {
         document.open();
 
         // 2. Vẽ Tiêu đề và Thông tin chung
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20);
-        Paragraph title = new Paragraph("PHIEU KET QUA BAI THI", fontTitle);
+        BaseFont bf = BaseFont.createFont("src/main/resources/fonts/times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(bf, 18, Font.BOLD);
+        Font normalFont = new Font(bf, 13);
+        Paragraph title = new Paragraph("PHIẾU KẾT QUẢ BÀI THI", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(new Paragraph(" "));
 
-        document.add(new Paragraph("Ky thi: " + detail.getExamTitle()));
-        document.add(new Paragraph("Thoi gian nop: " + detail.getSubmitTime()));
-        document.add(new Paragraph("Diem so: " + detail.getScore() + "/10.0"));
-        document.add(new Paragraph("-----------------------------------------------------------------------"));
-        document.add(new Paragraph(" "));
+        String studentName = detail.getFullName() != null ? detail.getFullName() : "N/A";
+        String studentIdStr = detail.getStudentId() != null ? detail.getStudentId() : "N/A";
 
-        // 3. Liệt kê chi tiết từng câu hỏi (Requirement e)
+        document.add(new Paragraph("Họ và tên: " + studentName, normalFont));
+        document.add(new Paragraph("Mã sinh viên: " + studentIdStr, normalFont));
+        document.add(new Paragraph("Kỳ thi: " + detail.getExamTitle(), normalFont));
+        document.add(new Paragraph("Thời gian nộp: " + detail.getSubmitTime(), normalFont));
+        document.add(new Paragraph("Điểm số: " + detail.getScore() + "/10", normalFont));
+        document.add(new Paragraph("-----------------------------------------------------------------------"));
+
+        // 3. Liệt kê chi tiết từng câu hỏi
         int i = 1;
         for (QuestionResultResponse q : detail.getQuestionResults()) {
-            Paragraph pQuestion = new Paragraph("Cau " + i + ": " + q.getContent(),
-                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
+            Paragraph pQuestion = new Paragraph("Câu " + i + ": " + q.getContent(), normalFont);
             document.add(pQuestion);
 
             // Hiển thị đáp án đã chọn và đáp án đúng
-            String statusText = q.getIsCorrect() ? "[Dung]" : "[Sai]";
-            document.add(new Paragraph("   - Trang thai: " + statusText));
-            document.add(new Paragraph("   - Giai thich: " + q.getExplanation())); // Giải thích từ DB
+            String statusText = q.getIsCorrect() ? "[Đúng]" : "[Sai]";
+            document.add(new Paragraph("   - Trạng thái: " + statusText, normalFont));
+            document.add(new Paragraph("   - Giải thích: " + q.getExplanation(), normalFont));
             document.add(new Paragraph(" "));
             i++;
         }

@@ -34,13 +34,17 @@ public class SubmissionServiceImpl implements SubmissionService {
      */
     @Override
     @Transactional
-    public SubmissionResultResponse submitExam(SubmitExamRequest request) {
-        // 1. Kiểm tra tồn tại
-        Submission submission = submissionRepository.findById(request.getSubmissionId())
+    public SubmissionResultResponse submitExam(Long userId, Long submissionId, SubmitExamRequest request) {
+        // 1. Kiểm tra tồn tại bằng submissionId lấy từ URL
+        Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên làm bài này"));
 
-        // Nếu bài này đã nộp rồi (có submitTime), có thể chặn không cho nộp lại
-        if (submission.getSubmitTime() != null) {
+        if(!submission.getUser().getId().equals(userId)){
+            throw new RuntimeException("Bài thi này không phải của bạn làm.");
+        }
+
+        // Nếu bài này đã nộp rồi (có submitTime hoặc trạng thái khác IN_PROGRESS), chặn không cho nộp đè
+        if (submission.getSubmitTime() != null || submission.getStatus() != SubmissionStatus.IN_PROGRESS) {
             throw new RuntimeException("Bài thi này đã được nộp trước đó.");
         }
 
@@ -52,6 +56,13 @@ public class SubmissionServiceImpl implements SubmissionService {
         long limitSeconds = (exam.getDurationMinutes() * 60) + 30; // 30s bù trừ độ trễ mạng
         long actualDurationSeconds = java.time.Duration.between(submission.getStartTime(), now).getSeconds();
         boolean isOvertime = actualDurationSeconds > limitSeconds;
+
+        // Cập nhật trạng thái bài nộp (Đã nộp hoặc Hết giờ)
+        if (Boolean.TRUE.equals(request.getIsAutoSubmit()) || isOvertime) {
+            submission.setStatus(SubmissionStatus.TIMEOUT);
+        } else {
+            submission.setStatus(SubmissionStatus.SUBMITTED);
+        }
 
         // 3. Chấm điểm
         int correctCount = 0;
@@ -102,6 +113,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         SubmissionResultResponse response = new SubmissionResultResponse();
         response.setSubmissionId(submission.getId());
         response.setExamTitle(exam.getTitle());
+        response.setFullName(submission.getUser().getFullName());
+        response.setStudentId(submission.getUser().getStudentId());
         response.setSubmitTime(submission.getSubmitTime());
         response.setScore(score);
         response.setCorrectAnswers(correctCount);
@@ -120,9 +133,13 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public TimeLeftResponse getTimeLeft(Long submissionId) {
+    public TimeLeftResponse getTimeLeft(Long userId, Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new RuntimeException("Phiên làm bài không tồn tại"));
+
+        if (!submission.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Truy cập bị từ chối!");
+        }
 
         Exam exam = submission.getExam();
         LocalDateTime startTime = submission.getStartTime();
@@ -148,26 +165,50 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    public List<SubmissionHistoryResponse> filterSubmissions(Long examId, LocalDateTime startDate, LocalDateTime endDate, Double minScore, Double maxScore) {
+        // 1. Lấy dữ liệu từ Repository
+        List<Submission> results = submissionRepository.filterSubmissions(
+                examId, startDate, endDate, minScore, maxScore);
+
+        // 2. Chuyển đổi sang DTO để trả về Frontend
+        return results.stream().map(s -> {
+            SubmissionHistoryResponse dto = new SubmissionHistoryResponse();
+            dto.setSubmissionId(s.getId());
+            dto.setExamTitle(s.getExam().getTitle());
+            dto.setScore(s.getScore());
+            dto.setSubmitTime(s.getSubmitTime());
+            dto.setCorrectAnswers(s.getCorrectAnswers());
+            dto.setTotalQuestions(s.getTotalQuestions());
+            dto.setStatus(s.getStatus().toString());
+
+            // Thông tin cá nhân
+            dto.setFullName(s.getUser().getFullName());
+            dto.setStudentId(s.getUser().getStudentId());
+            // dto.setUsername(s.getUser().getUsername()); // Nếu bạn cần hiển thị cả username
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
-    public Long startExam(StartExamRequest request) {
+    public Long startExam(Long userId, StartExamRequest request) {
+        // 1. Dùng trực tiếp userId từ tham số để tìm sinh viên
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sinh viên"));
+
         Exam exam = examRepository.findById(request.getExamId())
-                .orElseThrow(() -> new RuntimeException("Kỳ thi không tồn tại"));
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy kỳ thi"));
 
-        // Tạo bản ghi chờ sẵn trong DB
+        // 2. Tạo bản ghi Submission mới
         Submission submission = new Submission();
-        submission.setExam(exam);
         submission.setUser(user);
-        submission.setStartTime(LocalDateTime.now()); // Lưu thời điểm bắt đầu thật sự
+        submission.setExam(exam);
+        submission.setStartTime(LocalDateTime.now());
+        submission.setStatus(SubmissionStatus.IN_PROGRESS); // Trạng thái Đang làm bài
+        // ... set các giá trị khác
 
-        // Khởi tạo các giá trị mặc định để tránh lỗi null sau này
-        submission.setScore(0.0);
-        submission.setCorrectAnswers(0);
-        submission.setTotalQuestions(exam.getQuestions().size());
-
-        Submission saved = submissionRepository.save(submission);
-        return saved.getId(); // Trả về ID để Frontend cầm đi nộp bài
+        submission = submissionRepository.save(submission);
+        return submission.getId();
     }
 
     /**
@@ -184,6 +225,9 @@ public class SubmissionServiceImpl implements SubmissionService {
             dto.setCorrectAnswers(sub.getCorrectAnswers());
             dto.setTotalQuestions(sub.getTotalQuestions());
             dto.setSubmitTime(sub.getSubmitTime());
+
+            dto.setFullName(sub.getUser().getFullName());
+            dto.setStudentId(sub.getUser().getStudentId());
 
             if (sub.getSubmitTime() != null) {
                 dto.setStatus("Hoàn thành");
@@ -208,6 +252,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         resp.setExamTitle(submission.getExam().getTitle());
         resp.setScore(submission.getScore());
         resp.setSubmitTime(submission.getSubmitTime());
+        resp.setFullName(submission.getUser().getFullName());
+        resp.setStudentId(submission.getUser().getStudentId());
 
         List<QuestionResultResponse> details = submission.getDetails().stream().map(detail -> {
             Question q = detail.getQuestion();
@@ -221,6 +267,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 AnswerOptionResponse optDto = new AnswerOptionResponse();
                 optDto.setId(opt.getId());
                 optDto.setContent(opt.getContent());
+                optDto.setIsCorrect(opt.getIsCorrect());
                 return optDto;
             }).collect(Collectors.toList()));
 
@@ -243,5 +290,20 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         resp.setQuestionResults(details);
         return resp;
+    }
+
+    @Override
+    public SubmissionDetailResponse getSubmissionDetail(Long userId, Long submissionId) {
+        // Lấy bài nộp lên để kiểm tra
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên làm bài này"));
+
+        // BẢO MẬT: Kiểm tra xem sinh viên có đang xem trộm bài của người khác không
+        if (!submission.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Truy cập bị từ chối! Bạn không có quyền xem bài thi của người khác.");
+        }
+
+        // Nếu đúng là chính chủ -> Gọi lại hàm số 1 ở trên để trả về dữ liệu (tránh lặp code)
+        return this.getSubmissionDetail(submissionId);
     }
 }
