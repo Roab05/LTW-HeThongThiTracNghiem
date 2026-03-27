@@ -22,7 +22,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
+            throws IOException {
 
         // Log lỗi ra console của Backend để bạn dễ debug
         logger.error("Lỗi xác thực (Unauthorized) - URL: {}, Message: {}", request.getServletPath(), authException.getMessage());

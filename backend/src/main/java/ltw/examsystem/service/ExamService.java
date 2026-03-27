@@ -20,7 +20,7 @@ public interface ExamService {
 
     ExamSummaryResponse togglePublish(Long id, boolean publish);
 
-    List<ExamSummaryResponse> getAllExams();
+    List<ExamSummaryResponse> getAllExams(String title, ExamStatus status, ExamType type);
 
     List<ExamSummaryResponse> getExamsForStudent(String title, ExamStatus status, ExamType type);
 

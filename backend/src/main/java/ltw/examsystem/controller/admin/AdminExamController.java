@@ -4,6 +4,8 @@ import ltw.examsystem.dto.request.ExamRequest;
 import ltw.examsystem.dto.request.QuestionRequest;
 import ltw.examsystem.dto.response.ExamDetailResponse;
 import ltw.examsystem.dto.response.ExamSummaryResponse;
+import ltw.examsystem.entity.ExamStatus;
+import ltw.examsystem.entity.ExamType;
 import ltw.examsystem.service.ExamService;
 import ltw.examsystem.service.ExcelService;
 import ltw.examsystem.service.QuestionService;
@@ -29,8 +31,13 @@ public class AdminExamController {
     private ExcelService excelService;
 
     @GetMapping
-    public ResponseEntity<List<ExamSummaryResponse>> getAllExams() {
-        return ResponseEntity.ok(examService.getAllExams());
+    public ResponseEntity<List<ExamSummaryResponse>> getAllExams(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) ExamStatus status,
+            @RequestParam(required = false) ExamType type) {
+
+        // Truyền cả 3 tham số xuống Service
+        return ResponseEntity.ok(examService.getAllExams(title, status, type));
     }
 
     @GetMapping("/{id}")
@@ -40,67 +47,39 @@ public class AdminExamController {
 
     @PostMapping
     public ResponseEntity<?> createExam(@RequestBody ExamRequest request) {
-        try {
-            return ResponseEntity.ok(examService.createExam(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(examService.createExam(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExam(@PathVariable Long id, @RequestBody ExamRequest request) {
-        try {
-            return ResponseEntity.ok(examService.updateExam(id, request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(examService.updateExam(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExam(@PathVariable Long id) {
-        try {
-            examService.deleteExam(id);
-            return ResponseEntity.ok("Đã xóa kỳ thi thành công");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        examService.deleteExam(id);
+        return ResponseEntity.ok("Đã xóa kỳ thi thành công");
     }
 
     @PatchMapping("/{id}/publish")
     public ResponseEntity<?> togglePublish(@PathVariable Long id, @RequestParam boolean publish) {
-        try {
-            return ResponseEntity.ok(examService.togglePublish(id, publish));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(examService.togglePublish(id, publish));
     }
 
     @PostMapping("/{examId}/questions")
     public ResponseEntity<?> addQuestion(@PathVariable Long examId, @RequestBody QuestionRequest request) {
-        try {
-            return ResponseEntity.ok(questionService.addQuestion(examId, request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(questionService.addQuestion(examId, request));
     }
 
     @PutMapping("/questions/{questionId}")
     public ResponseEntity<?> updateQuestion(@PathVariable Long questionId, @RequestBody QuestionRequest request) {
-        try {
-            return ResponseEntity.ok(questionService.updateQuestion(questionId, request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(questionService.updateQuestion(questionId, request));
     }
 
     @DeleteMapping("/questions/{questionId}")
     public ResponseEntity<?> deleteQuestion(@PathVariable Long questionId) {
-        try {
-            questionService.deleteQuestion(questionId);
-            return ResponseEntity.ok("Đã xóa câu hỏi thành công");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        questionService.deleteQuestion(questionId);
+        return ResponseEntity.ok("Đã xóa câu hỏi thành công");
     }
 
     @PostMapping("/{examId}/import-questions")

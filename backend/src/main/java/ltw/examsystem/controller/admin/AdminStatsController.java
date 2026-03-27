@@ -2,8 +2,6 @@ package ltw.examsystem.controller.admin;
 
 import ltw.examsystem.dto.response.DashboardStatsResponse;
 import ltw.examsystem.dto.response.ExamStatsResponse;
-import ltw.examsystem.entity.Submission;
-import ltw.examsystem.repository.SubmissionRepository;
 import ltw.examsystem.service.ExcelService;
 import ltw.examsystem.service.PDFReportService;
 import ltw.examsystem.service.StatsService;
@@ -16,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -28,9 +22,6 @@ public class AdminStatsController {
 
     @Autowired
     private StatsService statsService;
-
-    @Autowired
-    private SubmissionRepository submissionRepository;
 
     @Autowired
     private ExcelService excelService;

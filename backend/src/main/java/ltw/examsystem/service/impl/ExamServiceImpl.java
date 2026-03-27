@@ -157,11 +157,10 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public List<ExamSummaryResponse> getAllExams() {
-        // Lấy toàn bộ Entity từ DB
-        List<Exam> exams = examRepository.findAll();
+    public List<ExamSummaryResponse> getAllExams(String title, ExamStatus status, ExamType type) {
+        // Hàm findByFilters sẽ tự động bỏ qua các điều kiện bị null
+        List<Exam> exams = examRepository.findByFilters(title, status, type);
 
-        // Dùng stream() để chuyển đổi (map) từng Entity sang DTO
         return exams.stream()
                 .map(this::convertToSummaryDto)
                 .collect(Collectors.toList());

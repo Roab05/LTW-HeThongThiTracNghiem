@@ -1,4 +1,4 @@
-package ltw.examsystem.controller;
+package ltw.examsystem.controller.student;
 
 import ltw.examsystem.dto.response.ExamDetailResponse;
 import ltw.examsystem.dto.response.ExamSummaryResponse;
@@ -24,7 +24,6 @@ public class StudentExamController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) ExamStatus status,
             @RequestParam(required = false) ExamType type) {
-        // Chỉ còn 1 dòng duy nhất!
         return ResponseEntity.ok(examService.getExamsForStudent(title, status, type));
     }
 

@@ -1,4 +1,4 @@
-package ltw.examsystem.controller;
+package ltw.examsystem.controller.student;
 
 import ltw.examsystem.dto.request.StartExamRequest;
 import ltw.examsystem.dto.request.SubmitExamRequest;

@@ -33,7 +33,6 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private QuestionRepository questionRepository;
 
-    // ĐÃ THÊM: Repository để tự động lấy dữ liệu bài thi
     @Autowired
     private SubmissionRepository submissionRepository;
 
